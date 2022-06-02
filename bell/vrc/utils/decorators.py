@@ -55,7 +55,10 @@ def async_try_except(reraise: bool = False) -> Callable:
 
     return decorator
 
-def run_forever(period: Optional[float] = None, frequency: Optional[float] = None) -> Callable:
+
+def run_forever(
+    period: Optional[float] = None, frequency: Optional[float] = None
+) -> Callable:
     """
     Function decorator that acts as a while: True block around the function, that
     runs every `period` seconds, or `frequency` times per second.

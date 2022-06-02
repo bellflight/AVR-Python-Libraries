@@ -7,6 +7,7 @@ class SerialLoop(serial.Serial):
     """
     Like the normal pyserial class, but with a method to run forever.
     """
+
     def run(self) -> None:
         while True:
             while self.in_waiting > 0:

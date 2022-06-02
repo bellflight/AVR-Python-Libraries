@@ -24,6 +24,7 @@ def test_rate_limit_period() -> None:
     # make sure the counter only incremented 2 times
     assert counter == 2
 
+
 def test_rate_limit_frequency() -> None:
     # create a counter starting at 0
     counter = 0
