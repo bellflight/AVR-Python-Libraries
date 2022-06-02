@@ -34,7 +34,7 @@
     isort     = "^5.10.1"
     autoflake = "^1.4"
     # linting
-    pyleft           = "^1.1.0"
+    pyleft = "^1.1.0"
     # building template
     Jinja2      = "^3.1.2"
     commentjson = "^0.9.0"
@@ -48,11 +48,12 @@
 [tool.pyright]
     typeCheckingMode = "basic"
 
-# [tool.pytest.ini_options]
-#     addopts = "-n auto"
+    # [tool.pytest.ini_options]
+    #     addopts = "-n auto"
 
 [tool.isort]
-    profile = "black"
+    profile        = "black"
+    skip_gitignore = true
 
 [build-system]
     requires      = ["poetry-core>=1.0.0"]
