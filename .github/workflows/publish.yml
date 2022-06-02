@@ -27,6 +27,7 @@ jobs:
 
       - name: Build
         run: |
+          poetry install
           poetry run python build.py
           poetry build
 
