@@ -16,6 +16,8 @@ from .payloads import (
     _{{ topic.name }}Callable,
 {%- endfor %}
 )
+from ..utils.decorators import try_except
+
 
 # create typed dict of topics associated with callbacks
 _MQTTTopicCallable = TypedDict(
@@ -86,21 +88,18 @@ class MQTTModule:
         # run in background
         self._mqtt_client.loop_start()
 
+    @try_except()
     def on_message(
         self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
     ) -> None:
         """
-        On message callback, Dispatches the message to the appropriate function.
+        On message callback, dispatches the message to the appropriate function.
         """
-        try:
-            # logger.debug(f"Recieved {msg.topic}: {msg.payload}")
-            if msg.topic in self.topic_map:
-                # we talk JSON, no exceptions
-                payload = json.loads(msg.payload)
-                self.topic_map[msg.topic](payload)
-
-        except Exception:
-            logger.exception(f"Error handling message on {msg.topic}")
+        # logger.debug(f"Recieved {msg.topic}: {msg.payload}")
+        if msg.topic in self.topic_map:
+            # we talk JSON, no exceptions
+            payload = json.loads(msg.payload)
+            self.topic_map[msg.topic](payload)
 
     def on_connect(
         self,
