@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import Any, Literal, Optional, TypedDict, Union, overload
+from typing import Any, Literal, TypedDict, Union, overload
 
 import paho.mqtt.client as mqtt
 from loguru import logger
@@ -55,7 +55,7 @@ class MQTTModule:
         self.mqtt_port = 18830
 
         # create the MQTT client
-        self._mqtt_client = mqtt.Client()
+        self._mqtt_client = mqtt.Client(protocol=mqtt.MQTTv311)
 
         # set up the on connect and on message handlers
         self._mqtt_client.on_connect = self.on_connect
@@ -89,9 +89,7 @@ class MQTTModule:
         self._mqtt_client.loop_start()
 
     @try_except()
-    def on_message(
-        self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage
-    ) -> None:
+    def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
         """
         On message callback, dispatches the message to the appropriate function.
         """
@@ -101,13 +99,7 @@ class MQTTModule:
             payload = json.loads(msg.payload)
             self.topic_map[msg.topic](payload)
 
-    def on_connect(
-        self,
-        client: mqtt.Client,
-        userdata: Any,
-        rc: Any,
-        properties: Optional[mqtt.Properties] = None,
-    ) -> None:
+    def on_connect(self, client: mqtt.Client, userdata: Any, flags: dict, rc: int) -> None:
         """
         On connection callback. Subscribes to MQTT topics in the topic map.
         """
@@ -123,7 +115,7 @@ class MQTTModule:
     def send_message(self, topic: Literal["{{ topic.path }}"], payload: {{ topic.name }}Payload) -> None: ...
 {%- endfor %}
 
-    def send_message(self, topic: Literal[{% for topic in topics %}"{{ topic.path }}"{% if not loop.last %},{% endif %} {% endfor %}], payload: Union[{% for topic in topics %}{{ topic.name }}Payload{% if not loop.last %},{% endif %} {% endfor %}]) -> None:
+    def send_message(self, topic: Literal[{% for topic in topics %}"{{ topic.path }}"{% if not loop.last %}, {% endif %}{% endfor %}], payload: Union[{% for topic in topics %}{{ topic.name }}Payload{% if not loop.last %}, {% endif %}{% endfor %}]) -> None:
         """
         Sends a message to the MQTT broker.
         """
