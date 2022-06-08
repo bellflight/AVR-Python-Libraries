@@ -34,9 +34,9 @@ that have all of the required fields for a message.
 Example:
 
 ```python
-from bell.vrc.mqtt.messages import VrcPcmSetBaseColorMessage
+from bell.vrc.mqtt.payloads import VrcPcmSetBaseColorPayload
 
-message = VrcPcmSetBaseColorMessage((128, 232, 142, 0))
+payload = VrcPcmSetBaseColorPayload((128, 232, 142, 0))
 ```
 
 The second part of the MQTT libraries, is the `MQTTModule` class.
@@ -47,14 +47,14 @@ Example:
 
 ```python
 from bell.vrc.mqtt.client import MQTTModule
-from bell.vrc.mqtt.messages import VrcFcmVelocityMessage, VrcPcmSetServoOpenCloseMessage
+from bell.vrc.mqtt.payloads import VrcFcmVelocityPayload, VrcPcmSetServoOpenClosePayload
 
 
 class Sandbox(MQTTModule):
     def __init__(self) -> None:
         self.topic_map = {"vrc/fcm/velocity": self.show_velocity}
 
-    def show_velocity(self, payload: VrcFcmVelocityMessage) -> None:
+    def show_velocity(self, payload: VrcFcmVelocityPayload) -> None:
         vx = payload["vX"]
         vy = payload["vY"]
         vz = payload["vZ"]
@@ -62,8 +62,8 @@ class Sandbox(MQTTModule):
         print(f"Velocity information: {v_ms} m/s")
 
     def open_servo(self) -> None:
-        message = VrcPcmSetServoOpenCloseMessage(servo=0, action="open")
-        self.send_message("vrc/pcm/set_servo_open_close", message)
+        payload = VrcPcmSetServoOpenClosePayload(servo=0, action="open")
+        self.send_message("vrc/pcm/set_servo_open_close", payload)
 
 
 if __name__ == "__main__":
@@ -73,13 +73,13 @@ if __name__ == "__main__":
 
 The `topic_map` dictionary is a class attribute that maps topics to subscribe to
 and a function that will handle an incoming payload. The `payload` argument
-should match the appropriate `Message` class for that topic.
+should match the appropriate `Payload` class for that topic.
 
 Additionally, the `message_cache` attribute is a dictionary that holds
 a copy of the last payload sent by that module on a given topic. The keys are the
 topic strings, and the values are the topic payloads.
 
-### Utilities
+### Utils
 
 ```python
 from bell.vrc import utils
@@ -87,14 +87,18 @@ from bell.vrc import utils
 
 These are general purpose utilities.
 
+#### Decorators
+
+```python
+from bell.vrc.utils import decorators
+```
+
 There are 3 different function decorators available, which are helpful for MQTT
 message callbacks. First is the `try_except` decorator, which wraps the
 function in a `try: except:` statement and will log any exceptions to the console:
 
 ```python
-    from bell.vrc.utils.decorators import try_except
-
-    @try_except
+    @decorators.try_except
     def assemble_hil_gps_message(self) -> None:
         ...
 ```
@@ -106,7 +110,7 @@ to propagate up, but log them.
 There is an async version of this decorator as well with an `async_` prefix.
 
 ```python
-    @async_try_except()
+    @decorators.async_try_except()
     async def connected_status_telemetry(self) -> None:
         ...
 ```
@@ -115,23 +119,97 @@ The last decorator is `run_forever` which will run the wrapped function forever,
 with a given `period` or `frequency`.
 
 ```python
-    @run_forever(frequency=5)
+    @decorators.run_forever(frequency=5)
     def read_data(self) -> None:
         ...
 ```
 
-Lastly, there is a `rate_limit` function which take a callable and a
+#### Timing
+
+```python
+from bell.vrc.utils import timing
+```
+
+Here is a `rate_limit` function which take a callable and a
 period or frequency, and only run the callable at that given rate.
 
 ```python
 for _ in range(10):
     # add() will only run twice
-    rate_limit(add, period=5)
+    timing.rate_limit(add, period=5)
     time.sleep(1)
+```
+
+This works tracking calls to the `rate_limit` function from a line number
+within a file, so multiple calls to `rate_limit` say within a loop
+with the same callable and period will be treated seperately. This allows
+for dynamic frequency manipulation.
+
+### Serial
+
+```python
+from bell.vrc import serial
+```
+
+These are serial utilities that help facilitate finding and communicating
+with the VRC peripherial control computer.
+
+#### Client
+
+```python
+from bell.vrc.serial import client
+```
+
+The `SerialLoop` class is a small wrapper around the `pyserial` `serial.Serial`
+class which adds a `run` method that will try to read data from the serial device
+as fast as possible.
+
+```python
+ser = client.SerialLoop()
+```
+
+#### PCC
+
+```python
+from bell.vrc.serial import client
+```
+
+The `PeripheralControlComputer` class sends serial messages
+to the VRC peripherial control computer, via easy-to-use class methods.
+
+```python
+import bell.vrc.serial
+import threading
+
+client = bell.vrc.serial.client.SerialLoop()
+client.port = port
+client.baudrate = baudrate
+
+pcc = bell.vrc.serial.pcc.PeripheralControlComputer(client)
+
+client_thread = threading.Thread(target=client.run)
+client_thread.start()
+
+pcc.set_servo_max(0, 100)
+```
+
+#### Ports
+
+```python
+from bell.vrc.serial import ports
+```
+
+Here is a `list_serial_ports` function which returns a list of detected serial
+ports connected to the system.
+
+```python
+serial_ports = ports.list_serial_ports()
+# ["COM1", "COM5", ...]
 ```
 
 ## Development
 
-Install [`poetry`](https://python-poetry.org/) and run `poetry install --extras mqtt --extras serial`.
+Install [`poetry`](https://python-poetry.org/) and run `poetry install --extras mqtt --extras serial` to install of the dependencies inside a virtual environment.
 
-Build the auto-generated code with `poetry run python build.py`.
+Build the auto-generated code with `poetry run python build.py`. From here,
+you can now produce a package with `poetry build`.
