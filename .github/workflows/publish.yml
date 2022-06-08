@@ -28,7 +28,7 @@ jobs:
       - name: Build
         run: |
           poetry install
-          poetry run python build.py
+          poetry run python build.py --docs
           poetry build
 
       - name: Get version

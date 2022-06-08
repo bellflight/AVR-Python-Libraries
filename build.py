@@ -1,3 +1,4 @@
+import argparse
 import os
 from typing import List
 
@@ -44,7 +45,7 @@ def process_klass(klass: dict) -> List[dict]:
     return new_klasses + new_new_klasses
 
 
-def main() -> None:
+def main(docs: bool) -> None:
     # setup jinja
     template_loader = jinja2.FileSystemLoader(searchpath=MQTT_DIR)
     template_env = jinja2.Environment(loader=template_loader)
@@ -91,16 +92,17 @@ def main() -> None:
         fp.write(client_template.render(klasses=klasses, messages=messages))
 
     # generate documentation
-    template = template_env.get_template("docs.j2")
+    if docs:
+        template = template_env.get_template("docs.j2")
 
-    print("Rendering documentation template")
-    with open(os.path.join(THIS_DIR, "README.md"), "r") as fp:
-        readme_data = fp.read()
-
-    with open(os.path.join(THIS_DIR, "README-generated.md"), "w") as fp:
-        fp.write(readme_data)
-        fp.write(template.render(klasses=klasses, messages=messages))
+        print("Rendering documentation template")
+        with open(os.path.join(THIS_DIR, "README.md"), "a") as fp:
+            fp.write(template.render(klasses=klasses, messages=messages))
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--docs", action="store_true", help="Generate documentation")
+    args = parser.parse_args()
+
+    main(args.docs)
