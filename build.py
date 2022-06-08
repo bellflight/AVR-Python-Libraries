@@ -68,7 +68,7 @@ def main(docs: bool) -> None:
         if "docs" not in message:
             message["docs"] = []
 
-        orig_docs = message['docs']
+        orig_docs = message["docs"]
         message["docs"] = [f"Topic: `{message['topic']}`"]
 
         if orig_docs:
