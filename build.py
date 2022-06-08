@@ -50,47 +50,52 @@ def main() -> None:
     template_env = jinja2.Environment(loader=template_loader)
 
     # load data
-    print("Loading data")
-    with open(os.path.join(MQTT_DIR, "data.jsonc"), "r") as fp:
-        topics = commentjson.load(fp)["topics"]
+    print("Loading message definitions")
+    with open(os.path.join(MQTT_DIR, "messages.jsonc"), "r") as fp:
+        messages = commentjson.load(fp)["messages"]
 
     # generate addtional class configuration
     # we need to do some pre-processing to make templating easier
-    print("Preprocessing data")
+    print("Preprocessing message definitions")
     klasses = []
-    for topic in topics:
-        if "name" not in topic:
+    for message in messages:
+        if "name" not in message:
             # generate a class name
-            topic["name"] = titleify(topic["path"])
+            message["name"] = titleify(message["topic"])
 
         # prepend path to topics docs
-        if "docs" not in topic:
-            topic["docs"] = ""
+        if "docs" not in message:
+            message["docs"] = []
 
-        topic["docs"] = f"Topic: `{topic['path']}`\n\n    {topic['docs']}".strip()
+        orig_docs = message['docs']
+        message["docs"] = [f"Topic: `{message['topic']}`"]
+
+        if orig_docs:
+            message["docs"].extend([""])
+            message["docs"].extend(orig_docs)
 
         # add generated klasses to seperate list
-        klasses.extend(process_klass(topic))
+        klasses.extend(process_klass(message))
 
     # generate python code
     payloads_template = template_env.get_template("payloads.j2")
 
     print("Rendering payloads template")
     with open(os.path.join(MQTT_DIR, "payloads.py"), "w") as fp:
-        fp.write(payloads_template.render(klasses=klasses, topics=topics))
+        fp.write(payloads_template.render(klasses=klasses, messages=messages))
 
     client_template = template_env.get_template("client.j2")
 
     print("Rendering client template")
     with open(os.path.join(MQTT_DIR, "client.py"), "w") as fp:
-        fp.write(client_template.render(klasses=klasses, topics=topics))
+        fp.write(client_template.render(klasses=klasses, messages=messages))
 
     # generate documentation
     # template = template_env.get_template("docs.j2")
 
     # print("Rendering documentation template")
-    # with open(os.path.join(THIS_DIR, "..", "MQTT.md"), "w") as fp:
-    #     fp.write(template.render(klasses=klasses, topics=topics))
+    # with open(os.path.join(THIS_DIR, "MQTT.md"), "w") as fp:
+    #     fp.write(template.render(klasses=klasses, messages=messages))
 
 
 if __name__ == "__main__":

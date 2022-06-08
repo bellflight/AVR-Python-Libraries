@@ -11,9 +11,9 @@ import paho.mqtt.client as mqtt
 from loguru import logger
 
 from .payloads import (
-{%- for topic in topics %}
-    {{ topic.name }}Payload,
-    _{{ topic.name }}Callable,
+{%- for message in messages %}
+    {{ message.name }}Payload,
+    _{{ message.name }}Callable,
 {%- endfor %}
 )
 from ..utils.decorators import try_except
@@ -23,8 +23,8 @@ from ..utils.decorators import try_except
 _MQTTTopicCallable = TypedDict(
     "_MQTTTopicCallable",
     {
-{%- for topic in topics %}
-        "{{ topic.path }}": _{{ topic.name }}Callable,
+{%- for message in messages %}
+        "{{ message.topic }}": _{{ message.name }}Callable,
 {%- endfor %}
     },
     total=False
@@ -34,8 +34,8 @@ _MQTTTopicCallable = TypedDict(
 _MQTTTopicPayload = TypedDict(
     "_MQTTTopicPayload",
     {
-{%- for topic in topics %}
-        "{{ topic.path }}": {{ topic.name }}Payload,
+{%- for message in messages %}
+        "{{ message.topic }}": {{ message.name }}Payload,
 {%- endfor %}
     },
     total=False
@@ -109,13 +109,13 @@ class MQTTModule:
             client.subscribe(topic)
             logger.success(f"Subscribed to: {topic}")
 
-{%- for topic in topics %}
+{%- for message in messages %}
 
     @overload
-    def send_message(self, topic: Literal["{{ topic.path }}"], payload: {{ topic.name }}Payload) -> None: ...
+    def send_message(self, topic: Literal["{{ message.topic }}"], payload: {{ message.name }}Payload) -> None: ...
 {%- endfor %}
 
-    def send_message(self, topic: Literal[{% for topic in topics %}"{{ topic.path }}"{% if not loop.last %}, {% endif %}{% endfor %}], payload: Union[{% for topic in topics %}{{ topic.name }}Payload{% if not loop.last %}, {% endif %}{% endfor %}]) -> None:
+    def send_message(self, topic: Literal[{% for message in messages %}"{{ message.topic }}"{% if not loop.last %}, {% endif %}{% endfor %}], payload: Union[{% for message in messages %}{{ message.name }}Payload{% if not loop.last %}, {% endif %}{% endfor %}]) -> None:
         """
         Sends a message to the MQTT broker.
         """

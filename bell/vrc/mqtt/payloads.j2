@@ -1,18 +1,22 @@
-{% macro class(item, suffix) %}
-class {{ item.name }}{{ suffix }}(TypedDict):
-{%- if ('docs' in item and item['docs']|length > 0) %}
+{%- macro class(message, suffix) %}
+class {{ message.name }}{{ suffix }}(TypedDict):
+{%- if ('docs' in message and message['docs']|length > 0) %}
     """
-    {{ item.docs }}
+{%- for line in message.docs %}
+    {{ line }}
+{%- endfor %}
     """
 {% endif -%}
-{%- if item.payload|length == 0 and ('docs' not in item or item['docs']|length == 0) %}
+{%- if message.payload|length == 0 and ('docs' not in message or message['docs']|length == 0) %}
     pass
 {%- else -%}
-{%- for p in item.payload %}
-    {{ p.key }}: {% if 'list' in p and p['list'] %}List[{{ p.type }}]{% else %}{{ p.type }}{% endif %}
-{%- if 'docs' in p and p['docs']|length > 0 %}
+{%- for item in message.payload %}
+    {{ item.key }}: {% if 'list' in item and item['list'] %}List[{{ item.type }}]{% else %}{{ item.type }}{% endif %}
+{%- if 'docs' in item and item['docs']|length > 0 %}
     """
-    {{ p.docs }}
+{%- for line in item.docs %}
+    {{ line }}
+{%- endfor %}
     """
 {%- endif %}
 {%- endfor %}
@@ -33,13 +37,13 @@ from typing import Any, List, Literal, Optional, Protocol, Tuple, TypedDict
 {% endfor %}
 # =========== payloads ===========
 
-{% for topic in topics %}
-{{ class(topic, "Payload") }}
+{% for message in messages %}
+{{ class(message, "Payload") }}
 
-class _{{ topic.name }}Callable(Protocol):
+class _{{ message.name }}Callable(Protocol):
     """
     Class used only for type-hinting MQTT callbacks
     """
-    def __call__(self, payload: {{ topic.name }}Payload) -> Any:
+    def __call__(self, payload: {{ message.name }}Payload) -> Any:
         ...
 {% endfor %}

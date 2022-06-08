@@ -209,7 +209,29 @@ serial_ports = ports.list_serial_ports()
 
 ## Development
 
-Install [`poetry`](https://python-poetry.org/) and run `poetry install --extras mqtt --extras serial` to install of the dependencies inside a virtual environment.
+Install [`poetry`](https://python-poetry.org/) and run
+`poetry install --extras mqtt --extras serial` to install of the dependencies
+inside a virtual environment.
 
 Build the auto-generated code with `poetry run python build.py`. From here,
 you can now produce a package with `poetry build`.
+
+To add new message definitions, add entries to the `bell/vrc/mqtt/messages.jsonc` file.
+The 3 parts of a new message are as follows:
+
+1. "topic": This is the full topic path for the message. This must be all lower case and
+   start with "vrc/".
+2. "payload": These are the keys of the payload for the message.
+   This is a list of key entries (see below).
+3. "docs": This is an optional Markdown string that explains what this message does.
+
+The key entries for a message have the following elements:
+
+1. "key": This is the name of the key. Must be a valid Python variable name.
+2. "type": This is the data type of the key such as `Tuple[int, int, int, int]`.
+   Must be a valid Python type hint. Otherwise, this can be a list of more
+   key entries, effectively creating a nested dictionary.
+3. "docs": This is an optional Markdown string that explains what this key is for.
+
+The `bell/vrc/mqtt/schema.json` file will help ensure the correct schema is maintained,
+assuming you are using VS Code.

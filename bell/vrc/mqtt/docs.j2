@@ -1,11 +1,13 @@
 {% macro class(item, suffix) %}
 ### {{ item.name }}{{ suffix }}
 {% if 'docs' in item and item['docs']|length > 0 %}
-{{ item.docs }}
+{%- for line in item.docs %}
+{{ line }}
+{%- endfor %}
 {% endif -%}
 {%- if item.payload|length > 0 %}
 {%- for p in item.payload %}
-- `"{{ p.key }}"` (`{% if 'list' in p and p['list'] %}List[{{ p.type }}]{% else %}{{ p.type }}{% endif %}`){%- if 'docs' in p and p['docs']|length > 0 %}: {{ p.docs }}{%- endif %}
+- `"{{ p.key }}"` (`{% if 'list' in p and p['list'] %}List[{{ p.type }}]{% else %}{{ p.type }}{% endif %}`){%- if 'docs' in p and p['docs']|length > 0 %}:{% for line in p.docs %} {{ line }}{% endfor %}{%- endif %}
 {%- endfor %}
 {%- else %}
 There is no content for this class
@@ -17,9 +19,12 @@ There is no content for this class
 ## Data Types
 
 {%- for klass in klasses %}
-{{ class(klass, "", "") }}
+{{ class(klass, "") }}
 {%- endfor %}
 
-{%- for topic in topics %}
-{{ class(topic, "Payload") }}
+## Message Payloads
+
+{%- for message in messages %}
+{{ class(message, "Payload") }}
 {%- endfor %}
+

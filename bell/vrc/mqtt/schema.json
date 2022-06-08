@@ -3,20 +3,23 @@
     "title": "VRC MQTT Data",
     "type": "object",
     "properties": {
-        "topics": {
+        "messages": {
             "description": "List of MQTT topics and payloads",
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "path": {
+                    "topic": {
                         "description": "Full MQTT topic path",
                         "type": "string",
                         "pattern": "^vrc\/[a-z\/_]+$"
                     },
                     "docs": {
                         "description": "Markdown description of the topic",
-                        "type": "string"
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
                     },
                     "payload": {
                         "description": "Payload of the topic. Must be a list of fields. An empty list is acceptable.",
@@ -40,13 +43,16 @@
                                             "type": "string"
                                         },
                                         {
-                                            "$ref": "#/properties/topics/items/properties/payload"
+                                            "$ref": "#/properties/messages/items/properties/payload"
                                         }
                                     ]
                                 },
                                 "docs": {
                                     "description": "Markdown description of the payload item",
-                                    "type": "string"
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
                                 }
                             },
                             "required": [
@@ -57,13 +63,13 @@
                     }
                 },
                 "required": [
-                    "path",
+                    "topic",
                     "payload"
                 ]
             }
         }
     },
     "required": [
-        "topics"
+        "messages"
     ]
 }
