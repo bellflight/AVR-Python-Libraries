@@ -223,7 +223,8 @@ The 3 parts of a new message are as follows:
    start with "vrc/".
 2. "payload": These are the keys of the payload for the message.
    This is a list of key entries (see below).
-3. "docs": This is an optional Markdown string that explains what this message does.
+3. "docs": This is an optional list of Markdown strings that explains what this
+   message does. Each list item is a new line.
 
 The key entries for a message have the following elements:
 
@@ -231,7 +232,8 @@ The key entries for a message have the following elements:
 2. "type": This is the data type of the key such as `Tuple[int, int, int, int]`.
    Must be a valid Python type hint. Otherwise, this can be a list of more
    key entries, effectively creating a nested dictionary.
-3. "docs": This is an optional Markdown string that explains what this key is for.
+3. "docs": This is an optional list of Markdown strings that explains what the
+   key is. Each list item is a new line.
 
 The `bell/vrc/mqtt/schema.json` file will help ensure the correct schema is maintained,
 assuming you are using VS Code.
