@@ -91,11 +91,15 @@ def main() -> None:
         fp.write(client_template.render(klasses=klasses, messages=messages))
 
     # generate documentation
-    # template = template_env.get_template("docs.j2")
+    template = template_env.get_template("docs.j2")
 
-    # print("Rendering documentation template")
-    # with open(os.path.join(THIS_DIR, "MQTT.md"), "w") as fp:
-    #     fp.write(template.render(klasses=klasses, messages=messages))
+    print("Rendering documentation template")
+    with open(os.path.join(THIS_DIR, "README.md"), "r") as fp:
+        readme_data = fp.read()
+
+    with open(os.path.join(THIS_DIR, "README-generated.md"), "w") as fp:
+        fp.write(readme_data)
+        fp.write(template.render(klasses=klasses, messages=messages))
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 {% macro class(item, suffix) %}
-### {{ item.name }}{{ suffix }}
+#### {{ item.name }}{{ suffix }}
 {% if 'docs' in item and item['docs']|length > 0 %}
 {%- for line in item.docs %}
 {{ line }}
@@ -12,17 +12,16 @@
 {%- else %}
 There is no content for this class
 {%- endif %}
-{%- endmacro -%}
+{%- endmacro %}
+## MQTT Documentation
 
-# MQTT Documentation
-
-## Data Types
+### Data Types
 
 {%- for klass in klasses %}
 {{ class(klass, "") }}
 {%- endfor %}
 
-## Message Payloads
+### Message Payloads
 
 {%- for message in messages %}
 {{ class(message, "Payload") }}

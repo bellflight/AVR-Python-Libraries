@@ -3,7 +3,7 @@
     version = "0.1.2"
     description = ""
     license = "MIT"
-    readme = "README.md"
+    readme = "README-generated.md"
     homepage = "https://github.com/bellflight/VRC-Python-Libraries"
     authors = ["Chris Padilla <cpadilla@bellflight.com>"]
     packages = [{ include = "bell/vrc" }]
