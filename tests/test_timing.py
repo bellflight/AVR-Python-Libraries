@@ -1,6 +1,6 @@
 import time
 
-from bell.vrc.utils.timing import rate_limit
+from bell.avr.utils.timing import rate_limit
 
 
 def test_rate_limit_period() -> None:

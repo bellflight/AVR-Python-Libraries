@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-import bell.vrc.utils.decorators as decorators
+import bell.avr.utils.decorators as decorators
 
 
 def test_try_except_no_reraise() -> None:

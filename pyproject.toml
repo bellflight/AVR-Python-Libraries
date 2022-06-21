@@ -1,15 +1,15 @@
 [tool.poetry]
-    name = "bell-vrc-libraries"
+    name = "bell-avr-libraries"
     version = "0.1.2"
     description = ""
     license = "MIT"
     readme = "README.md"
-    homepage = "https://github.com/bellflight/VRC-Python-Libraries"
+    homepage = "https://github.com/bellflight/AVR-Python-Libraries"
     authors = [
         "Chris Padilla <cpadilla@bellflight.com>",
         "Nathan Vaughn <nvaughn@bellflight.com>",
     ]
-    packages = [{ include = "bell/vrc" }]
+    packages = [{ include = "bell/avr" }]
     exclude = [
         "bell/**/*.j2",
         "bell/**/*.json",

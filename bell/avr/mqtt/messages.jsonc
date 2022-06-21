@@ -3,7 +3,7 @@
     "messages": [
         // autonomous
         {
-            "topic": "vrc/autonomous",
+            "topic": "avr/autonomous",
             "docs": ["This enables enable or disable autonomous mode. This is not used by any Bell code, but available to students to listen to who may wish to not always be running their autonomous mode,"],
             "payload": [
                 {
@@ -14,7 +14,7 @@
         },
         // pcm
         {
-            "topic": "vrc/pcm/set_base_color",
+            "topic": "avr/pcm/set_base_color",
             "docs": ["This sets the color of the LED strip on the PCC"],
             "payload": [
                 {
@@ -25,7 +25,7 @@
             ]
         },
         {
-            "topic": "vrc/pcm/set_temp_color",
+            "topic": "avr/pcm/set_temp_color",
             "docs": ["This sets the color of the LED strip on the PCC temporarily"],
             "payload": [
                 {
@@ -41,17 +41,17 @@
             ]
         },
         {
-            "topic": "vrc/pcm/set_laser_on",
+            "topic": "avr/pcm/set_laser_on",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/pcm/set_laser_off",
+            "topic": "avr/pcm/set_laser_off",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/pcm/set_servo_open_close",
+            "topic": "avr/pcm/set_servo_open_close",
             "docs": [],
             "payload": [
                 {
@@ -67,7 +67,7 @@
             ]
         },
         {
-            "topic": "vrc/pcm/set_servo_min",
+            "topic": "avr/pcm/set_servo_min",
             "docs": [],
             "payload": [
                 {
@@ -83,7 +83,7 @@
             ]
         },
         {
-            "topic": "vrc/pcm/set_servo_max",
+            "topic": "avr/pcm/set_servo_max",
             "docs": [],
             "payload": [
                 {
@@ -99,7 +99,7 @@
             ]
         },
         {
-            "topic": "vrc/pcm/set_servo_pct",
+            "topic": "avr/pcm/set_servo_pct",
             "docs": [],
             "payload": [
                 {
@@ -115,13 +115,13 @@
             ]
         },
         {
-            "topic": "vrc/pcm/reset",
+            "topic": "avr/pcm/reset",
             "docs": ["This resets the PCC"],
             "payload": []
         },
         // fcm
         {
-            "topic": "vrc/fcm/hil_gps_stats",
+            "topic": "avr/fcm/hil_gps_stats",
             "docs": [],
             "payload": [
                 {
@@ -132,7 +132,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/events",
+            "topic": "avr/fcm/events",
             "docs": [],
             "payload": [
                 {
@@ -153,7 +153,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/battery",
+            "topic": "avr/fcm/battery",
             "docs": [],
             "payload": [
                 {
@@ -174,7 +174,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/status",
+            "topic": "avr/fcm/status",
             "docs": [],
             "payload": [
                 {
@@ -195,7 +195,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/location/local",
+            "topic": "avr/fcm/location/local",
             "docs": [],
             "payload": [
                 {
@@ -221,7 +221,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/location/global",
+            "topic": "avr/fcm/location/global",
             "docs": [],
             "payload": [
                 {
@@ -252,7 +252,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/location/home",
+            "topic": "avr/fcm/location/home",
             "docs": [],
             "payload": [
                 {
@@ -278,7 +278,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/attitude/euler",
+            "topic": "avr/fcm/attitude/euler",
             "docs": [],
             "payload": [
                 {
@@ -304,7 +304,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/velocity",
+            "topic": "avr/fcm/velocity",
             "docs": [],
             "payload": [
                 {
@@ -330,7 +330,7 @@
             ]
         },
         {
-            "topic": "vrc/fcm/gps_info",
+            "topic": "avr/fcm/gps_info",
             "docs": [],
             "payload": [
                 {
@@ -352,7 +352,7 @@
         },
         // fusion
         {
-            "topic": "vrc/fusion/position/ned",
+            "topic": "avr/fusion/position/ned",
             "docs": [],
             "payload": [
                 {
@@ -370,7 +370,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/velocity/ned",
+            "topic": "avr/fusion/velocity/ned",
             "docs": [],
             "payload": [
                 {
@@ -388,7 +388,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/geo",
+            "topic": "avr/fusion/geo",
             "docs": [],
             "payload": [
                 {
@@ -406,7 +406,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/groundspeed",
+            "topic": "avr/fusion/groundspeed",
             "docs": [],
             "payload": [
                 {
@@ -416,7 +416,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/course",
+            "topic": "avr/fusion/course",
             "docs": [],
             "payload": [
                 {
@@ -426,7 +426,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/climbrate",
+            "topic": "avr/fusion/climbrate",
             "docs": [],
             "payload": [
                 {
@@ -436,7 +436,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/attitude/quat",
+            "topic": "avr/fusion/attitude/quat",
             "docs": [],
             "payload": [
                 {
@@ -458,7 +458,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/attitude/euler",
+            "topic": "avr/fusion/attitude/euler",
             "docs": [],
             "payload": [
                 {
@@ -476,7 +476,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/attitude/heading",
+            "topic": "avr/fusion/attitude/heading",
             "docs": [],
             "payload": [
                 {
@@ -486,7 +486,7 @@
             ]
         },
         {
-            "topic": "vrc/fusion/hil_gps",
+            "topic": "avr/fusion/hil_gps",
             "docs": [],
             "payload": [
                 {
@@ -549,7 +549,7 @@
         },
         // vio
         {
-            "topic": "vrc/vio/resync",
+            "topic": "avr/vio/resync",
             "docs": [],
             "payload": [
                 {
@@ -571,7 +571,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/position/ned",
+            "topic": "avr/vio/position/ned",
             "docs": [],
             "payload": [
                 {
@@ -589,7 +589,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/velocity/ned",
+            "topic": "avr/vio/velocity/ned",
             "docs": [],
             "payload": [
                 {
@@ -607,7 +607,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/orientation/eul",
+            "topic": "avr/vio/orientation/eul",
             "docs": [],
             "payload": [
                 {
@@ -625,7 +625,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/orientation/quat",
+            "topic": "avr/vio/orientation/quat",
             "docs": [],
             "payload": [
                 {
@@ -647,7 +647,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/heading",
+            "topic": "avr/vio/heading",
             "docs": [],
             "payload": [
                 {
@@ -657,7 +657,7 @@
             ]
         },
         {
-            "topic": "vrc/vio/confidence",
+            "topic": "avr/vio/confidence",
             "docs": [],
             "payload": [
                 {
@@ -669,7 +669,7 @@
         },
         // apriltag
         {
-            "topic": "vrc/apriltags/selected",
+            "topic": "avr/apriltags/selected",
             "docs": ["This topic publishes its best candidate for position feedback"],
             "payload": [
                 {
@@ -705,7 +705,7 @@
             ]
         },
         {
-            "topic": "vrc/apriltags/raw",
+            "topic": "avr/apriltags/raw",
             "docs": ["This topic publishes the raw tag data"],
             "payload": [
                 {
@@ -747,7 +747,7 @@
             ]
         },
         {
-            "topic": "vrc/apriltags/visible",
+            "topic": "avr/apriltags/visible",
             "docs": ["This topic publishes the transformed tag data"],
             "payload": [
                 {
@@ -826,7 +826,7 @@
             ]
         },
         {
-            "topic": "vrc/apriltags/fps",
+            "topic": "avr/apriltags/fps",
             "docs": [],
             "payload": [
                 {
@@ -837,7 +837,7 @@
         },
         // thermal
         {
-            "topic": "vrc/thermal/reading",
+            "topic": "avr/thermal/reading",
             "docs": [],
             "payload": [
                 {
@@ -848,27 +848,27 @@
         },
         // status
         {
-            "topic": "vrc/status/light/pcm",
+            "topic": "avr/status/light/pcm",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/status/light/vio",
+            "topic": "avr/status/light/vio",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/status/light/apriltags",
+            "topic": "avr/status/light/apriltags",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/status/light/fcm",
+            "topic": "avr/status/light/fcm",
             "docs": [],
             "payload": []
         },
         {
-            "topic": "vrc/status/light/thermal",
+            "topic": "avr/status/light/thermal",
             "docs": [],
             "payload": []
         }

@@ -1,18 +1,18 @@
-# VRC-Python-Libraries
+# AVR-Python-Libraries
 
 ## Install
 
 To install the base package, run:
 
 ```bash
-pip install bell-vrc-libraries
+pip install bell-avr-libraries
 ```
 
 Additionally, the `mqtt` and `serial` extras are available if you want to use
 the MQTT or PCC functionality.
 
 ```bash
-pip install bell-vrc-libraries[mqtt,serial]
+pip install bell-avr-libraries[mqtt,serial]
 ```
 
 ## Usage
@@ -20,13 +20,13 @@ pip install bell-vrc-libraries[mqtt,serial]
 ### MQTT
 
 ```python
-from bell.vrc import mqtt
+from bell.avr import mqtt
 ```
 
 These are MQTT utilities that are used to have a consistent messaging protocol
-throughout all the VRC software modules.
+throughout all the AVR software modules.
 
-The first part of this are the payloads for the MQTT messages themselves. As VRC
+The first part of this are the payloads for the MQTT messages themselves. As AVR
 exclusively uses JSON, these are all
 [`TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict)s
 that have all of the required fields for a message.
@@ -34,27 +34,27 @@ that have all of the required fields for a message.
 Example:
 
 ```python
-from bell.vrc.mqtt.payloads import VrcPcmSetBaseColorPayload
+from bell.avr.mqtt.payloads import AvrPcmSetBaseColorPayload
 
-payload = VrcPcmSetBaseColorPayload((128, 232, 142, 0))
+payload = AvrPcmSetBaseColorPayload((128, 232, 142, 0))
 ```
 
 The second part of the MQTT libraries, is the `MQTTModule` class.
-This is a boilerplate module for VRC that makes it very easy to send
+This is a boilerplate module for AVR that makes it very easy to send
 and recieve MQTT messages and do something with them.
 
 Example:
 
 ```python
-from bell.vrc.mqtt.client import MQTTModule
-from bell.vrc.mqtt.payloads import VrcFcmVelocityPayload, VrcPcmSetServoOpenClosePayload
+from bell.avr.mqtt.client import MQTTModule
+from bell.avr.mqtt.payloads import AvrFcmVelocityPayload, AvrPcmSetServoOpenClosePayload
 
 
 class Sandbox(MQTTModule):
     def __init__(self) -> None:
-        self.topic_map = {"vrc/fcm/velocity": self.show_velocity}
+        self.topic_map = {"avr/fcm/velocity": self.show_velocity}
 
-    def show_velocity(self, payload: VrcFcmVelocityPayload) -> None:
+    def show_velocity(self, payload: AvrFcmVelocityPayload) -> None:
         vx = payload["vX"]
         vy = payload["vY"]
         vz = payload["vZ"]
@@ -62,8 +62,8 @@ class Sandbox(MQTTModule):
         print(f"Velocity information: {v_ms} m/s")
 
     def open_servo(self) -> None:
-        payload = VrcPcmSetServoOpenClosePayload(servo=0, action="open")
-        self.send_message("vrc/pcm/set_servo_open_close", payload)
+        payload = AvrPcmSetServoOpenClosePayload(servo=0, action="open")
+        self.send_message("avr/pcm/set_servo_open_close", payload)
 
 
 if __name__ == "__main__":
@@ -82,7 +82,7 @@ topic strings, and the values are the topic payloads.
 ### Utils
 
 ```python
-from bell.vrc import utils
+from bell.avr import utils
 ```
 
 These are general purpose utilities.
@@ -90,7 +90,7 @@ These are general purpose utilities.
 #### Decorators
 
 ```python
-from bell.vrc.utils import decorators
+from bell.avr.utils import decorators
 ```
 
 There are 3 different function decorators available, which are helpful for MQTT
@@ -127,7 +127,7 @@ with a given `period` or `frequency`.
 #### Timing
 
 ```python
-from bell.vrc.utils import timing
+from bell.avr.utils import timing
 ```
 
 Here is a `rate_limit` function which take a callable and a
@@ -148,16 +148,16 @@ for dynamic frequency manipulation.
 ### Serial
 
 ```python
-from bell.vrc import serial
+from bell.avr import serial
 ```
 
 These are serial utilities that help facilitate finding and communicating
-with the VRC peripherial control computer.
+with the AVR peripherial control computer.
 
 #### Client
 
 ```python
-from bell.vrc.serial import client
+from bell.avr.serial import client
 ```
 
 The `SerialLoop` class is a small wrapper around the `pyserial` `serial.Serial`
@@ -171,21 +171,21 @@ ser = client.SerialLoop()
 #### PCC
 
 ```python
-from bell.vrc.serial import client
+from bell.avr.serial import client
 ```
 
 The `PeripheralControlComputer` class sends serial messages
-to the VRC peripherial control computer, via easy-to-use class methods.
+to the AVR peripherial control computer, via easy-to-use class methods.
 
 ```python
-import bell.vrc.serial
+import bell.avr.serial
 import threading
 
-client = bell.vrc.serial.client.SerialLoop()
+client = bell.avr.serial.client.SerialLoop()
 client.port = port
 client.baudrate = baudrate
 
-pcc = bell.vrc.serial.pcc.PeripheralControlComputer(client)
+pcc = bell.avr.serial.pcc.PeripheralControlComputer(client)
 
 client_thread = threading.Thread(target=client.run)
 client_thread.start()
@@ -196,7 +196,7 @@ pcc.set_servo_max(0, 100)
 #### Ports
 
 ```python
-from bell.vrc.serial import ports
+from bell.avr.serial import ports
 ```
 
 Here is a `list_serial_ports` function which returns a list of detected serial
@@ -216,11 +216,11 @@ inside a virtual environment.
 Build the auto-generated code with `poetry run python build.py`. From here,
 you can now produce a package with `poetry build`.
 
-To add new message definitions, add entries to the `bell/vrc/mqtt/messages.jsonc` file.
+To add new message definitions, add entries to the `bell/avr/mqtt/messages.jsonc` file.
 The 3 parts of a new message are as follows:
 
 1. "topic": This is the full topic path for the message. This must be all lower case and
-   start with "vrc/".
+   start with "avr/".
 2. "payload": These are the keys of the payload for the message.
    This is a list of key entries (see below).
 3. "docs": This is an optional list of Markdown strings that explains what this
@@ -235,5 +235,5 @@ The key entries for a message have the following elements:
 3. "docs": This is an optional list of Markdown strings that explains what the
    key is. Each list item is a new line.
 
-The `bell/vrc/mqtt/schema.json` file will help ensure the correct schema is maintained,
+The `bell/avr/mqtt/schema.json` file will help ensure the correct schema is maintained,
 assuming you are using VS Code.

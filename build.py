@@ -6,7 +6,7 @@ import commentjson
 import jinja2
 
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
-MQTT_DIR = os.path.join(THIS_DIR, "bell", "vrc", "mqtt")
+MQTT_DIR = os.path.join(THIS_DIR, "bell", "avr", "mqtt")
 
 
 def titleify(text: str) -> str:

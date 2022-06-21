@@ -24,7 +24,7 @@ class PeripheralControlComputer:
             "SET_TEMP_COLOR": 5,
             "SET_LASER_ON": 6,
             "SET_LASER_OFF": 7,
-            "RESET_VRC_PERIPH": 8,
+            "RESET_AVR_PERIPH": 8,
             "CHECK_SERVO_CONTROLLER": 9,
         }
 
@@ -167,8 +167,8 @@ class PeripheralControlComputer:
         logger.debug(f"Setting the laser off: {data}")
         self.ser.write(data)
 
-    def reset_vrc_peripheral(self) -> None:
-        command = self.commands["RESET_VRC_PERIPH"]
+    def reset_avr_peripheral(self) -> None:
+        command = self.commands["RESET_AVR_PERIPH"]
 
         length = 1  # just the reset command
         data = self._construct_payload(command, length)
