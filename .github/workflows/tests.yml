@@ -95,8 +95,8 @@ jobs:
           poetry install --extras "serial" --extras "mqtt"
           poetry run python build.py --docs
 
-      - name: Install Pyright
-        run: npm install pyright
+      - name: Install Node Dependencies
+        run: npm install
 
       - name: Run Pyright
         run: poetry run npx pyright .
