@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import Any, Literal, TypedDict, Union, overload
+from typing import Any, Literal, TypedDict, overload
 
 import paho.mqtt.client as mqtt
 from loguru import logger
@@ -115,7 +115,7 @@ class MQTTModule:
     def send_message(self, topic: Literal["{{ message.topic }}"], payload: {{ message.name }}Payload) -> None: ...
 {%- endfor %}
 
-    def send_message(self, topic: Literal[{% for message in messages %}"{{ message.topic }}"{% if not loop.last %}, {% endif %}{% endfor %}], payload: Union[{% for message in messages %}{{ message.name }}Payload{% if not loop.last %}, {% endif %}{% endfor %}]) -> None:
+    def send_message(self, topic, payload) -> None:
         """
         Sends a message to the MQTT broker.
         """
