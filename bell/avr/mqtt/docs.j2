@@ -7,7 +7,8 @@
 {% endif -%}
 {%- if item.payload|length > 0 %}
 {%- for p in item.payload %}
-- `"{{ p.key }}"` (`{% if 'list' in p and p['list'] %}List[{{ p.type }}]{% else %}{{ p.type }}{% endif %}`){%- if 'docs' in p and p['docs']|length > 0 %}:{% for line in p.docs %} {{ line }}{% endfor %}{%- endif %}
+- `"{{ p.key }}"` (`{% if 'list' in p and p['list'] %}List[{{ p.type }}]{% else %}{{ p.type }}{% endif %}`){%- if 'docs' in p and p['docs']|length > 0 %}:{% for line in p.docs %}
+    {{ line }}{% endfor %}{%- endif %}
 {%- endfor %}
 {%- else %}
 There is no content for this class
