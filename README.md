@@ -178,12 +178,14 @@ The `PeripheralControlComputer` class sends serial messages
 to the AVR peripherial control computer, via easy-to-use class methods.
 
 ```python
-import bell.avr.serial
+import bell.avr.serial.client
+import bell.avr.serial.pcc
 import threading
 
 client = bell.avr.serial.client.SerialLoop()
 client.port = port
 client.baudrate = baudrate
+client.open()
 
 pcc = bell.avr.serial.pcc.PeripheralControlComputer(client)
 

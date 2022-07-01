@@ -55,7 +55,9 @@
         },
         {
             "topic": "avr/pcm/fire_laser",
-            "docs": [],
+            "docs": [
+                "Fires the laser for a 0.25 sec pulse. Has a cooldown of 0.5 sec."
+            ],
             "payload": []
         },
         {
