@@ -22,10 +22,9 @@ class PeripheralControlComputer:
             "SET_SERVO_PCT": 3,
             "SET_BASE_COLOR": 4,
             "SET_TEMP_COLOR": 5,
-            "SET_LASER_ON": 6,
-            "SET_LASER_OFF": 7,
-            "RESET_AVR_PERIPH": 8,
-            "CHECK_SERVO_CONTROLLER": 9,
+            "FIRE_LASER": 6,
+            "RESET_AVR_PERIPH": 7,
+            "CHECK_SERVO_CONTROLLER": 8,
         }
 
         self.shutdown: bool = False
@@ -149,22 +148,13 @@ class PeripheralControlComputer:
         logger.debug(f"Setting servo percent: {data}")
         self.ser.write(data)
 
-    def set_laser_on(self) -> None:
-        command = self.commands["SET_LASER_ON"]
+    def fire_laser(self) -> None:
+        command = self.commands["FIRE_LASER"]
 
         length = 1
         data = self._construct_payload(command, length)
 
         logger.debug(f"Setting the laser on: {data}")
-        self.ser.write(data)
-
-    def set_laser_off(self) -> None:
-        command = self.commands["SET_LASER_OFF"]
-
-        length = 1
-        data = self._construct_payload(command, length)
-
-        logger.debug(f"Setting the laser off: {data}")
         self.ser.write(data)
 
     def reset_avr_peripheral(self) -> None:

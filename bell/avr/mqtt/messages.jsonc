@@ -41,12 +41,7 @@
             ]
         },
         {
-            "topic": "avr/pcm/set_laser_on",
-            "docs": [],
-            "payload": []
-        },
-        {
-            "topic": "avr/pcm/set_laser_off",
+            "topic": "avr/pcm/fire_laser",
             "docs": [],
             "payload": []
         },
