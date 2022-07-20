@@ -52,6 +52,7 @@ from bell.avr.mqtt.payloads import AvrFcmVelocityPayload, AvrPcmSetServoOpenClos
 
 class Sandbox(MQTTModule):
     def __init__(self) -> None:
+        super().__init__()
         self.topic_map = {"avr/fcm/velocity": self.show_velocity}
 
     def show_velocity(self, payload: AvrFcmVelocityPayload) -> None:
