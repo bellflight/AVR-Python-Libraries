@@ -103,3 +103,59 @@ jobs:
 
       - name: Run Pyleft
         run: poetry run python -m pyleft .
+
+  version-number:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Poetry
+        uses: Gr1N/setup-poetry@v7
+
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+          cache: poetry
+
+      - name: Check Version Number
+        shell: python
+        run: |
+          import json
+          import os
+          import subprocess
+
+          release_tags_json = subprocess.check_output(
+              [
+                  "gh",
+                  "api",
+                  "graphql",
+                  "-F",
+                  f"owner={os.environ['OWNER']}",
+                  "-F",
+                  f"name={os.environ['REPO']}",
+                  "-f",
+                  "query=query($name: String!, $owner: String!) {repository(owner: $owner, name: $name) {releases(last: 10){nodes{tagName}}}}",
+              ]
+          )
+
+
+          release_tags = [
+              r["tagName"]
+              for r in json.loads(release_tags_json)["data"]["repository"]["releases"]["nodes"]
+          ]
+
+          poetry_version = (
+              subprocess.check_output(["poetry", "version", "--short"]).decode("utf-8").strip()
+          )
+
+          print(f"Current version: {poetry_version}")
+          print(f"Published versions: {release_tags}")
+          assert poetry_version not in release_tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
