@@ -1,6 +1,6 @@
 [tool.poetry]
     name = "bell-avr-libraries"
-    version = "0.1.6"
+    version = "0.1.7"
     description = "Common Python libraries used by parts of Bell AVR"
     license = "MIT"
     readme = "README.md"

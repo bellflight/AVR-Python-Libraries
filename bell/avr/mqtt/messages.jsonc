@@ -162,6 +162,28 @@
                 }
             ]
         },
+        {
+            "topic": "avr/pcm/set_servo_abs",
+            "docs": [
+                "This sets the absolute position of a specific servo. SERVOMIN 150 is closed, and SERVOMAX 425 is open. We need to send a High and Low byte due to limitations of the API"
+            ],
+            "payload": [
+                {
+                    "key": "servo",
+                    "type": "int",
+                    "docs": [
+                        "ID of the servo to set the percent as an `int`. This is 0-indexed."
+                    ]
+                },
+                {
+                    "key": "absolute",
+                    "type": "int",
+                    "docs": [
+                        "Absolute position between SERVOMIN 150 and SERVOMAX 425"
+                    ]
+                }
+            ]
+        },
         // {
         //     "topic": "avr/pcm/reset",
         //     "docs": ["This resets the PCC"],
