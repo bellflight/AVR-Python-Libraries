@@ -160,8 +160,8 @@ class PeripheralControlComputer:
 
         if isinstance(absolute, (float, int)) and absolute <= 425 and absolute >= 150:
             uint16_absolute = ctypes.c_uint16(absolute).value
-            uint8_absolute_high = (uint16_absolute >> 8) & 0xff
-            uint8_absolute_low = uint16_absolute & 0xff
+            uint8_absolute_high = (uint16_absolute >> 8) & 0xFF
+            uint8_absolute_low = uint16_absolute & 0xFF
             valid_command = True
             data = [servo, int(uint8_absolute_high), int(uint8_absolute_low)]
 
