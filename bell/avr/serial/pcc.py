@@ -21,13 +21,14 @@ class PeripheralControlComputer:
             "SET_SERVO_MIN": 1,
             "SET_SERVO_MAX": 2,
             "SET_SERVO_PCT": 3,
-            "SET_BASE_COLOR": 4,
-            "SET_TEMP_COLOR": 5,
-            "FIRE_LASER": 6,
-            "SET_LASER_ON": 7,
-            "SET_LASER_OFF": 8,
-            "RESET_AVR_PERIPH": 9,
-            "CHECK_SERVO_CONTROLLER": 10,
+            "SET_SERVO_ABS": 4,
+            "SET_BASE_COLOR": 5,
+            "SET_TEMP_COLOR": 6,
+            "FIRE_LASER": 7,
+            "SET_LASER_ON": 8,
+            "SET_LASER_OFF": 9,
+            "RESET_AVR_PERIPH": 10,
+            "CHECK_SERVO_CONTROLLER": 11,
         }
 
         self.shutdown: bool = False
