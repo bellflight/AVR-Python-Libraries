@@ -158,7 +158,7 @@ class PeripheralControlComputer:
         command = self.commands["SET_SERVO_ABS"]
         data = []
 
-        if isinstance(absolute, (int)):
+        if isinstance(absolute, int):
             uint16_absolute = ctypes.c_uint16(absolute).value
             uint8_absolute_high = (uint16_absolute >> 8) & 0xFF
             uint8_absolute_low = uint16_absolute & 0xFF
