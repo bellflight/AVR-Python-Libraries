@@ -40,7 +40,12 @@
                                     "description": "Payload field type. Can either be a string or a list of nested payload fields.",
                                     "oneOf": [
                                         {
-                                            "type": "string"
+                                            "type": "string",
+                                            "enum": ["bool", "int", "float", "str"]
+                                        },
+                                        {
+                                            "type": "string",
+                                            "pattern": "^(Literal|Tuple|Optional)"
                                         },
                                         {
                                             "$ref": "#/properties/messages/items/properties/payload"
