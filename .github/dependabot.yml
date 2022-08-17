@@ -5,25 +5,18 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-    target-branch: "develop"
-
-  # Maintain dependencies for Git Submodules
-  - package-ecosystem: "gitsubmodule"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    target-branch: "develop"
+    target-branch: "main"
 
   # Maintain dependencies for npm
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "monthly"
-    target-branch: "develop"
+    target-branch: "main"
 
   # Maintain dependencies for pip
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "monthly"
-    target-branch: "develop"
+    target-branch: "main"
