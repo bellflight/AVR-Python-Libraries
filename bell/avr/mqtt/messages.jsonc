@@ -1236,6 +1236,30 @@
             "topic": "avr/status/light/thermal",
             "docs": [],
             "payload": []
+        },
+        // #endregion
+        // #region game
+        {
+            "topic": "avr/game/building/state",
+            "docs": [
+                "This publishes information on the state of a building"
+            ],
+            "payload": [
+                {
+                    "key": "id",
+                    "type": "int",
+                    "docs": [
+                        "0-index ID of the building that information is for"
+                    ]
+                },
+                {
+                    "key": "on_fire",
+                    "type": "bool",
+                    "docs": [
+                        "Boolean of whether the building is on fire or not"
+                    ]
+                }
+            ]
         }
         // #endregion
     ]
