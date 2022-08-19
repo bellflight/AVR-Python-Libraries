@@ -1,20 +1,6 @@
 {
     "$schema": "schema.json",
     "messages": [
-        // #region autonomous
-        {
-            "topic": "avr/autonomous",
-            "docs": [
-                "This enables enable or disable autonomous mode. This is not used by any Bell code, but available to students to listen to who may wish to not always be running their autonomous mode,"
-            ],
-            "payload": [
-                {
-                    "key": "enable",
-                    "type": "bool"
-                }
-            ]
-        },
-        // #endregion
         // #region pcm
         {
             "topic": "avr/pcm/set_base_color",
@@ -1238,25 +1224,37 @@
             "payload": []
         },
         // #endregion
-        // #region game
+        // #region autonomous
         {
-            "topic": "avr/game/building/state",
+            "topic": "avr/autonomous/enable",
             "docs": [
-                "This publishes information on the state of a building"
+                "This enables or disables autonomous mode. This is not used by any Bell code, but available to students to."
+            ],
+            "payload": [
+                {
+                    "key": "enabled",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "topic": "avr/autonomous/building/drop",
+            "docs": [
+                "This enables or disables a building payload drop. This is not used by any Bell code, but available to students to listen to."
             ],
             "payload": [
                 {
                     "key": "id",
                     "type": "int",
                     "docs": [
-                        "0-index ID of the building that information is for"
+                        "0-index ID of the relevant building"
                     ]
                 },
                 {
-                    "key": "on_fire",
+                    "key": "enabled",
                     "type": "bool",
                     "docs": [
-                        "Boolean of whether the building is on fire or not"
+                        "Boolean of whether the building should have drop enabled"
                     ]
                 }
             ]
