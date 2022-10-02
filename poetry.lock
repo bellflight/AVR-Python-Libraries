@@ -14,7 +14,7 @@ tests_no_zope = ["cloudpickle", "coverage[toml] (>=5.0.2)", "hypothesis", "mypy 
 
 [[package]]
 name = "autoflake"
-version = "1.5.3"
+version = "1.6.1"
 description = "Removes unused imports and unused variables"
 category = "dev"
 optional = false
@@ -22,7 +22,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 pyflakes = ">=1.1.0"
-toml = ">=0.10.2"
+tomli = {version = ">=2.0.1", markers = "python_version < \"3.11\""}
 
 [[package]]
 name = "black"
@@ -317,14 +317,6 @@ setproctitle = ["setproctitle"]
 testing = ["filelock"]
 
 [[package]]
-name = "toml"
-version = "0.10.2"
-description = "Python Library for Tom's Obvious, Minimal Language"
-category = "dev"
-optional = false
-python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
-
-[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -358,7 +350,7 @@ serial = ["pyserial"]
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "2542be5adec8c6ef5ce94352b0ce5caae95120a523c2d888e20d5d29c2a7c298"
+content-hash = "e4ef8a8835f0c0b505bcaa4c3e383264c1259ec77162bff565ec75deb13f552b"
 
 [metadata.files]
 attrs = [
@@ -366,8 +358,8 @@ attrs = [
     {file = "attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
 ]
 autoflake = [
-    {file = "autoflake-1.5.3-py2.py3-none-any.whl", hash = "sha256:90eb8d3f625bd72068eb670338ea7efcddbc5c6e822d3601e3dc9404c06ea8da"},
-    {file = "autoflake-1.5.3.tar.gz", hash = "sha256:44f7d7eb2c1c49505b513c0e93a5dfd3f7b4218283f50c5ca0af4df6b975d470"},
+    {file = "autoflake-1.6.1-py2.py3-none-any.whl", hash = "sha256:dfef4c851fb07e6111f9115d3e7c8c52d8564cbf71c12ade2d8b8a2a7b8bd176"},
+    {file = "autoflake-1.6.1.tar.gz", hash = "sha256:72bce741144ef6db26005d47dba242c1fd6a91ea53f7f4c5a90ad4b051e394c2"},
 ]
 black = [
     {file = "black-22.8.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ce957f1d6b78a8a231b18e0dd2d94a33d2ba738cd88a7fe64f53f659eea49fdd"},
@@ -524,10 +516,6 @@ pytest-forked = [
 pytest-xdist = [
     {file = "pytest-xdist-2.5.0.tar.gz", hash = "sha256:4580deca3ff04ddb2ac53eba39d76cb5dd5edeac050cb6fbc768b0dd712b4edf"},
     {file = "pytest_xdist-2.5.0-py3-none-any.whl", hash = "sha256:6fe5c74fec98906deb8f2d2b616b5c782022744978e7bd4695d39c8f42d0ce65"},
-]
-toml = [
-    {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
-    {file = "toml-0.10.2.tar.gz", hash = "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"},
 ]
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
