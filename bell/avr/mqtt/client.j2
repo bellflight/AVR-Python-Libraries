@@ -68,6 +68,9 @@ class MQTTModule:
         # maintain a cache of the last message sent on a topic by this module
         self.message_cache: _MQTTTopicPayload = {}
 
+        # record if we were started with loop forever
+        self._looped_forever = False
+
     def run(self) -> None:
         """
         Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
@@ -76,6 +79,7 @@ class MQTTModule:
         # connect the MQTT client
         self._mqtt_client.connect(host=self.mqtt_host, port=self.mqtt_port, keepalive=60)
         # run forever
+        self._looped_forever = True
         self._mqtt_client.loop_forever()
 
     def run_non_blocking(self) -> None:
@@ -121,5 +125,14 @@ class MQTTModule:
         """
         # logger.debug(f"Sending message to {topic}: {payload}")
         self._mqtt_client.publish(topic, json.dumps(payload))
+
+        # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
+        # pre-emptively write network data while still in a callback, bypassing
+        # the thread mutex.
+        # can only be used if run with .loop_forever()
+        # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
+        if self._looped_forever:
+            self._mqtt_client.loop_write()
+
         self.message_cache[topic] = copy.deepcopy(payload)
 
