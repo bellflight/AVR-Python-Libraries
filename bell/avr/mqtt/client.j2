@@ -116,12 +116,14 @@ class MQTTModule:
 {%- for message in messages %}
 
     @overload
-    def send_message(self, topic: Literal["{{ message.topic }}"], payload: {{ message.name }}Payload) -> None: ...
+    def send_message(self, topic: Literal["{{ message.topic }}"], payload: {{ message.name }}Payload, force_write: bool) -> None: ...
 {%- endfor %}
 
-    def send_message(self, topic, payload) -> None:
+    def send_message(self, topic, payload, force_write = False) -> None:
         """
-        Sends a message to the MQTT broker.
+        Sends a message to the MQTT broker. Enabling `force_write` will
+        forcefully send the message, bypassing threading mutex. Only use this
+        if you know what you're doing.
         """
         # logger.debug(f"Sending message to {topic}: {payload}")
         self._mqtt_client.publish(topic, json.dumps(payload))
@@ -131,7 +133,7 @@ class MQTTModule:
         # the thread mutex.
         # can only be used if run with .loop_forever()
         # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
-        if self._looped_forever:
+        if self._looped_forever or force_write:
             self._mqtt_client.loop_write()
 
         self.message_cache[topic] = copy.deepcopy(payload)
