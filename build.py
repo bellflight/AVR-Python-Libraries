@@ -78,7 +78,17 @@ def main(docs: bool) -> None:
         # add generated klasses to seperate list
         klasses.extend(process_klass(message))
 
+    # sort klasses and messages
+    messages = sorted(messages, key=lambda x: x["name"])
+    klasses = sorted(klasses, key=lambda x: x["name"])
+
     # generate python code
+    constants_template = template_env.get_template("constants.j2")
+
+    print("Rendering constants template")
+    with open(os.path.join(MQTT_DIR, "constants.py"), "w") as fp:
+        fp.write(constants_template.render(klasses=klasses, messages=messages))
+
     payloads_template = template_env.get_template("payloads.j2")
 
     print("Rendering payloads template")

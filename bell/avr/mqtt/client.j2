@@ -10,36 +10,13 @@ from typing import Any, Literal, TypedDict, overload
 import paho.mqtt.client as mqtt
 from loguru import logger
 
+from .constants import _MQTTTopicCallableTypedDict, _MQTTTopicPayloadTypedDict
 from .payloads import (
 {%- for message in messages %}
     {{ message.name }}Payload,
-    _{{ message.name }}Callable,
 {%- endfor %}
 )
 from ..utils.decorators import try_except
-
-
-# create typed dict of topics associated with callbacks
-_MQTTTopicCallable = TypedDict(
-    "_MQTTTopicCallable",
-    {
-{%- for message in messages %}
-        "{{ message.topic }}": _{{ message.name }}Callable,
-{%- endfor %}
-    },
-    total=False
-)
-
-# create typed dict of topics associated with payloads
-_MQTTTopicPayload = TypedDict(
-    "_MQTTTopicPayload",
-    {
-{%- for message in messages %}
-        "{{ message.topic }}": {{ message.name }}Payload,
-{%- endfor %}
-    },
-    total=False
-)
 
 
 class MQTTModule:
@@ -63,10 +40,10 @@ class MQTTModule:
 
         # dictionary of MQTT topics to callback functions
         # this is intended to be overwritten by the child class
-        self.topic_map: _MQTTTopicCallable = {}
+        self.topic_map: _MQTTTopicCallableTypedDict = {}
 
         # maintain a cache of the last message sent on a topic by this module
-        self.message_cache: _MQTTTopicPayload = {}
+        self.message_cache: _MQTTTopicPayloadTypedDict = {}
 
         # record if we were started with loop forever
         self._looped_forever = False

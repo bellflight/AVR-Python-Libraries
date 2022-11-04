@@ -1,0 +1,71 @@
+from typing import Type, TypedDict
+
+from .payloads import (
+{%- for message in messages %}
+    {{ message.name }}Payload,
+    _{{ message.name }}Callable,
+{%- endfor %}
+)
+
+
+# List of MQTT topics
+MQTTTopics = [
+{%- for message in messages %}
+    "{{ message.topic }}",
+{%- endfor %}
+]
+
+# List of MQTT payload types
+MQTTPayloads = [
+{%- for message in messages %}
+    {{ message.name }}Payload,
+{%- endfor %}
+]
+
+# TypedDict of topics to callback function signature
+_MQTTTopicCallableTypedDict = TypedDict(
+    "_MQTTTopicCallableTypedDict",
+    {
+{%- for message in messages %}
+        "{{ message.topic }}": _{{ message.name }}Callable,
+{%- endfor %}
+    },
+    total=False
+)
+
+# Actual dictionary of topics to callback function signature
+MQTTTopicCallable: _MQTTTopicCallableTypedDict = {
+{%- for message in messages %}
+    "{{ message.topic }}": _{{ message.name }}Callable,
+{%- endfor %}
+}
+
+
+# TypedDict of topics to associated payloads
+_MQTTTopicPayloadTypedDict = TypedDict(
+    "_MQTTTopicPayloadTypedDict",
+    {
+{%- for message in messages %}
+        "{{ message.topic }}": {{ message.name }}Payload,
+{%- endfor %}
+    },
+    total=False
+)
+
+# TypedDict of topics to associated payload types
+_MQTTTopicPayloadTypeTypedDict = TypedDict(
+    "_MQTTTopicPayloadTypeTypedDict",
+    {
+{%- for message in messages %}
+        "{{ message.topic }}": Type[{{ message.name }}Payload],
+{%- endfor %}
+    },
+    total=False
+)
+
+# Actual dictionary of topics to associated payload types
+MQTTTopicPayload: _MQTTTopicPayloadTypeTypedDict = {
+{%- for message in messages %}
+    "{{ message.topic }}": {{ message.name }}Payload,
+{%- endfor %}
+}
