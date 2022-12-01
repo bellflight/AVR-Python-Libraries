@@ -35,7 +35,7 @@
     # formatting
     black     = "^22.10.0"
     isort     = "^5.10.1"
-    autoflake = "^1.7.7"
+    autoflake = "^2.0.0"
     # linting
     pyleft = "^1.1.0"
     # building template
