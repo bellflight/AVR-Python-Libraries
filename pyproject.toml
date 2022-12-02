@@ -28,7 +28,7 @@
     serial = ["pyserial"]
     mqtt   = ["paho-mqtt"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
     # testing
     pytest       = "^7.2.0"
     pytest-xdist = "^3.0.2"
@@ -39,8 +39,9 @@
     # linting
     pyleft = "^1.1.0"
     # building template
-    Jinja2      = "^3.1.2"
-    commentjson = "^0.9.0"
+    Jinja2                   = "^3.1.2"
+    datamodel-code-generator = "^0.14.0"
+    jsonref                  = "^1.0.1"
 
 [tool.coverage.run]
     omit = ["*.venv*"]

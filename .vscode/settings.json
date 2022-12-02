@@ -1,0 +1,10 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/asyncapi.json"
+            ],
+            "url": "https://www.asyncapi.com/schema-store/all.schema-store.json"
+        }
+    ]
+}
