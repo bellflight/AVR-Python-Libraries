@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "pyright": "^1.1.278"
+    "@asyncapi/generator": "^1.9.14",
+    "pyright": "^1.1.282"
   }
 }
