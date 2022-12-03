@@ -1,0 +1,762 @@
+asyncapi: 2.5.0
+info:
+    title: "Bell AVR MQTT Message Spec"
+    version: "1.0"
+channels:
+    avr/pcm/color/set:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMColorSet"
+            description: "Set the color of the LED strip on the PCC."
+    avr/pcm/color/timed:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMColorTimed"
+            description: "Set the color of the LED strip on the PCC temporarily."
+    avr/pcm/laser/fire:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMLaserFire"
+            description: "Fires the laser for a 0.25 second pulse. Has a cooldown of 0.5 seconds."
+    avr/pcm/laser/on:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMLaserOn"
+            description: "Turns laser on for 0.1 second every 0.5 seconds."
+    avr/pcm/laser/off:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMLaserOff"
+            description: "Turns off laser. Does not prevent `avr/pcm/laser/fire`."
+    avr/pcm/servo/open:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoOpen"
+            description: "Opens a specific servo."
+    avr/pcm/servo/close:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoClose"
+            description: "Closes a specific servo."
+    avr/pcm/servo/pwm/min:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoPWMMin"
+            description: "Set the minimum pulse width of a specific servo."
+    avr/pcm/servo/pwm/max:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoPWMMax"
+            description: "Set the maximum pulse width of a specific servo."
+    avr/pcm/servo/percent:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoPercent"
+            description: "Set the percentage of a specific servo."
+    avr/pcm/servo/absolute:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRPCMServoAbsolute"
+            description: "Set the absolute position of a specific servo."
+    avr/fcm/hil_gps/stats:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMHILGPSStats"
+            description: "Reports statistics on the HIL GPS data that is fed into the flight controller."
+    avr/fcm/event:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMEvent"
+            description: "Reports events from the flight controller such as flight mode changes."
+    avr/fcm/battery:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMBattery"
+            description: "Reports battery information from the flight controller."
+    avr/fcm/status:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMStatus"
+            description: "Reports general status flight controller."
+    avr/fcm/position/local:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMPositionLocal"
+            description: "Reports the current position of the drone in local coordinates from the flight controller."
+    avr/fcm/position/global:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMPositionGlobal"
+            description: "Reports the current position of the drone in global coordinates from the flight controller."
+    avr/fcm/position/home:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMPositionHome"
+            description: "Reports the current position of the drone's home position in global coordinates."
+    avr/fcm/attitude/euler/degrees:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMAttitudeEulerDegrees"
+            description: "Reports the current attitude of the drone from the flight controller in Euler degrees."
+    avr/fcm/velocity:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMVelocity"
+            description: "Reports the current velocity vectors of the drone from the flight controller."
+    avr/fcm/gps/info:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMGPSInfo"
+            description: "Reports the current status of the flight controller's GPS connection."
+    avr/fusion/position/local:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionPositionLocal"
+            description: "Reports the computed position of the drone in local coordinates from our sensor fusion."
+    avr/fusion/velocity:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionVelocity"
+            description: "Reports the computed velocity vectors of the drone from our sensor fusion."
+    avr/fusion/position/global:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionPositionGlobal"
+            description: "Reports the computed position of the drone in global coordinates from our sensor fusion."
+    avr/fusion/groundspeed:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionGroundspeed"
+            description: "Reports the computed groundspeed of the drone from our sensor fusion."
+    avr/fusion/course:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionCourse"
+            description: "Reports the computed course of the drone from our sensor fusion."
+    avr/fusion/heading:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionHeading"
+            description: "Reports the computed heading of the drone from our sensor fusion."
+    avr/fusion/climbrate:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionClimbrate"
+            description: "Reports the computed rate of climb of the drone from our sensor fusion."
+    avr/fusion/attitude/quaternion:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionAttitudeQuaternion"
+            description: "Reports the computed attitude of the drone from our sensor fusion as a Quaternion."
+    avr/fusion/attitude/euler/radians:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionAttitudeEulerRadians"
+            description: "Reports the computed attitude of the drone from our sensor fusion in Euler radians."
+    avr/fusion/hil_gps/message:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFusionHILGPSMessage"
+            description: This is the raw data that will get converted to a MAVLink message and sent to the flight controller for HIL GPS. <https://mavlink.io/en/messages/common.html#HIL_GPS>
+components:
+    schemas:
+        wrgb:
+            description: "A list of 4 integers between 0 and 255 to set the base color of the LEDs. This is in order of Red, Green, Blue, and Alpha"
+            type: array
+            minItems: 4
+            maxItems: 4
+            items:
+                description: "Color value."
+                type: integer
+        servo:
+            description: "ID of the servo. This is 0-indexed."
+            type: integer
+            minimum: 0
+            maximum: 15
+        pulse:
+            description: "Pulse width."
+            type: integer
+            minimum: 0
+            maximum: 1000
+        lat:
+            description: "Latitude in degrees."
+            type: number
+            minimum: -90
+            maximum: 90
+        lon:
+            description: "Longitude in degrees."
+            type: number
+            minimum: -180
+            maximum: 180
+        takeoff_alt:
+            description: "Altitude relative to takeoff altitude in meters."
+            type: number
+        hdg:
+            description: "Heading in degrees."
+            type: number
+            minimum: 0
+            maximum: 360
+        "n":
+            description: "X position in a local North/East/Down coordinate system in meters."
+            type: number
+        e:
+            description: "Y position in a local North/East/Down coordinate system in meters."
+            type: number
+        d:
+            description: "Z position in a local North/East/Down coordinate system in meters."
+            type: number
+        vN:
+            description: "X velocity in a local North/East/Down coordinate system in meters per second."
+            type: number
+        vE:
+            description: "Y velocity in a local North/East/Down coordinate system in meters per second."
+            type: number
+        vD:
+            description: "Z velocity in a local North/East/Down coordinate system in meters per second."
+            type: number
+        quat_w:
+            description: "Quaternion w value"
+            type: number
+            minimum: -1
+            maximum: 1
+        quat_x:
+            description: "Quaternion x value"
+            type: number
+            minimum: -1
+            maximum: 1
+        quat_y:
+            description: "Quaternion y value"
+            type: number
+            minimum: -1
+            maximum: 1
+        quat_z:
+            description: "Quaternion z value"
+            type: number
+            minimum: -1
+            maximum: 1
+        roll:
+            description: "Roll in degrees"
+            type: number
+            minimum: -360
+            maximum: 360
+        pitch:
+            description: "Pitch in degrees"
+            type: number
+            minimum: -360
+            maximum: 360
+        yaw:
+            description: "Yaw in degrees"
+            type: number
+            minimum: -360
+            maximum: 360
+        psi:
+            description: "Roll in radians"
+            type: number
+            minimum: -6.2831853
+            maximum: 6.2831853
+        theta:
+            description: "Pitch in radians"
+            type: number
+            minimum: -6.2831853
+            maximum: 6.2831853
+        phi:
+            description: "Yaw in radians"
+            type: number
+            minimum: -6.2831853
+            maximum: 6.2831853
+    messages:
+        AVRPCMColorSet:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - wrgb
+                properties:
+                    wrgb:
+                        $ref: "#/components/schemas/wrgb"
+
+        AVRPCMColorTimed:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - wrgb
+                properties:
+                    wrgb:
+                        $ref: "#/components/schemas/wrgb"
+                    time:
+                        description: "Number of seconds the color should be set for. Default is 0.5."
+                        type: number
+                        minimum: 0
+                        default: 0.5
+
+        AVRPCMLaserFire:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRPCMLaserOn:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRPCMLaserOff:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRPCMServoOpen:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+
+        AVRPCMServoClose:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+
+        AVRPCMServoPWMMin:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                    - pulse
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+                    pulse:
+                        $ref: "#/components/schemas/pulse"
+
+        AVRPCMServoPWMMax:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                    - pulse
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+                    pulse:
+                        $ref: "#/components/schemas/pulse"
+
+        AVRPCMServoPercent:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                    - percent
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+                    percent:
+                        description: "Servo percent. 0 is closed, and 100 is open."
+                        type: integer
+                        minimum: 0
+                        maximum: 100
+
+        AVRPCMServoAbsolute:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - servo
+                    - position
+                properties:
+                    servo:
+                        $ref: "#/components/schemas/servo"
+                    position:
+                        description: "Absolute position between SERVOMIN (closed) and SERVOMAX (open)."
+                        type: integer
+                        minimum: 150
+                        maximum: 425
+
+        AVRFCMHILGPSStats:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - frames
+                properties:
+                    frames:
+                        description: "The number of messages that have been sent to the flight controller since the software has started."
+                        type: integer
+
+        AVRFCMEvent:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - name
+                    - payload
+                properties:
+                    name:
+                        description: "The name of the event."
+                        type: string
+                    payload:
+                        description: "The payload of the event."
+                        type: string
+
+        AVRFCMBattery:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - voltage
+                    - state_of_charge
+                properties:
+                    voltage:
+                        description: "Battery voltage."
+                        type: number
+                    state_of_charge:
+                        description: "Battery state of charge as a percentage"
+                        type: number
+                        minimum: 0
+                        maximum: 100
+
+        AVRFCMStatus:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - armed
+                    - flight_mode
+                properties:
+                    armed:
+                        description: "Indicates if the drone is currently armed"
+                        type: boolean
+                    flight_mode:
+                        description: "Active flight mode"
+                        type: string
+                        # http://mavsdk-python-docs.s3-website.eu-central-1.amazonaws.com/plugins/telemetry.html#mavsdk.telemetry.FlightMode
+                        enum:
+                            - UNKNOWN
+                            - READY
+                            - TAKEOFF
+                            - HOLD
+                            - MISSION
+                            - RETURN_TO_LAUNCH
+                            - LAND
+                            - OFFBOARD
+                            - FOLLOW_ME
+                            - MANUAL
+                            - ALTCTL
+                            - POSCTL
+                            - ACRO
+                            - STABILIZED
+                            - RATTITUDE
+
+        AVRFCMPositionLocal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - "n"
+                    - e
+                    - d
+                properties:
+                    "n":
+                        $ref: "#/components/schemas/n"
+                    e:
+                        $ref: "#/components/schemas/e"
+                    d:
+                        $ref: "#/components/schemas/d"
+
+        AVRFCMPositionGlobal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - lat
+                    - lon
+                    - alt
+                    - hdg
+                properties:
+                    lat:
+                        $ref: "#/components/schemas/lat"
+                    lon:
+                        $ref: "#/components/schemas/lon"
+                    alt:
+                        $ref: "#/components/schemas/takeoff_alt"
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
+
+        AVRFCMPositionHome:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - lat
+                    - lon
+                    - alt
+                properties:
+                    lat:
+                        $ref: "#/components/schemas/lat"
+                    lon:
+                        $ref: "#/components/schemas/lon"
+                    alt:
+                        description: "Altitude relative to the home position in meters."
+                        type: number
+
+        AVRFCMAttitudeEulerDegrees:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - roll
+                    - pitch
+                    - yaw
+                properties:
+                    roll:
+                        $ref: "#/components/schemas/roll"
+                    pitch:
+                        $ref: "#/components/schemas/pitch"
+                    yaw:
+                        $ref: "#/components/schemas/yaw"
+
+        AVRFCMVelocity:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - vN
+                    - vE
+                    - vD
+                properties:
+                    vN:
+                        $ref: "#/components/schemas/vN"
+                    vE:
+                        $ref: "#/components/schemas/vE"
+                    vD:
+                        $ref: "#/components/schemas/vD"
+
+        AVRFCMGPSInfo:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - visible_satellites
+                    - fix_type
+                properties:
+                    visible_satellites:
+                        description: "Number of visible satellites in use. HIL GPS will appear as 13."
+                        type: integer
+                    fix_type:
+                        description: "GPS fix type"
+                        type: string
+                        # http://mavsdk-python-docs.s3-website.eu-central-1.amazonaws.com/plugins/telemetry.html#mavsdk.telemetry.FixType
+                        enum:
+                            - NO_GPS
+                            - NO_FIX
+                            - FIX_2D
+                            - FIX_3D
+                            - FIX_DGPS
+                            - RTK_FLOAT
+                            - RTK_FIXED
+
+        AVRFusionPositionLocal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - "n"
+                    - e
+                    - d
+                properties:
+                    "n":
+                        $ref: "#/components/schemas/n"
+                    e:
+                        $ref: "#/components/schemas/e"
+                    d:
+                        $ref: "#/components/schemas/d"
+
+        AVRFusionVelocity:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - vN
+                    - vE
+                    - vD
+                properties:
+                    vN:
+                        $ref: "#/components/schemas/vN"
+                    vE:
+                        $ref: "#/components/schemas/vE"
+                    vD:
+                        $ref: "#/components/schemas/vD"
+
+        AVRFusionPositionGlobal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - lat
+                    - lon
+                    - alt
+                    - hdg
+                properties:
+                    lat:
+                        $ref: "#/components/schemas/lat"
+                    lon:
+                        $ref: "#/components/schemas/lon"
+                    alt:
+                        $ref: "#/components/schemas/takeoff_alt"
+
+        AVRFusionGroundspeed:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - groundspeed
+                properties:
+                    groundspeed:
+                        description: Groundspeed of the drone in meters per second. This is a normal vector of the N and E velocities.
+                        type: number
+
+        AVRFusionHeading:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - hdg
+                properties:
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
+
+        AVRFusionCourse:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - course
+                properties:
+                    course:
+                        description: "Course in degrees."
+                        type: number
+                        minimum: 0
+                        maximum: 360
+
+        AVRFusionClimbrate:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - climbrate
+                properties:
+                    climbrate:
+                        description: Rate of climb in feet per second.
+                        type: number
+
+        AVRFusionAttitudeQuaternion:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - w
+                    - x
+                    - "y"
+                    - z
+                properties:
+                    x:
+                        $ref: "#/components/schemas/quat_x"
+                    "y":
+                        $ref: "#/components/schemas/quat_y"
+                    z:
+                        $ref: "#/components/schemas/quat_z"
+                    w:
+                        $ref: "#/components/schemas/quat_w"
+
+        AVRFusionAttitudeEulerRadians:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - psi
+                    - theta
+                    - phi
+                properties:
+                    psi:
+                        $ref: "#/components/schemas/psi"
+                    theta:
+                        $ref: "#/components/schemas/theta"
+                    phi:
+                        $ref: "#/components/schemas/phi"
+
+        AVRFusionHILGPSMessage:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - time_usec
+                    - fix_type
+                    - lat
+                    - lon
+                    - alt
+                    - eph
+                    - epv
+                    - vel
+                    - vn
+                    - ve
+                    - vd
+                    - cog
+                    - satellites_visible
+                    - heading
+                properties:
+                    time_usec:
+                        description: UNIX epoch timestamp in microseconds
+                        type: integer
+                    fix_type:
+                        description: "0-1: no fix, 2: 2D fix, 3: 3D fix"
+                        type: integer
+                        minimum: 0
+                        maximum: 3
+                    lat:
+                        description: WGS84 Latitude * 10000000
+                        type: integer
+                    lon:
+                        description: WGS84 Longitude * 10000000
+                        type: integer
+                    alt:
+                        description: Altitude from sea level in mm. Positive for up.
+                        type: integer
+                    eph:
+                        description: "GPS HDOP (horizontal dilution of position)"
+                        type: integer
+                    epv:
+                        description: "GPS VDOP (vertical dilution of position)"
+                        type: integer
+                    vel:
+                        description: GPS ground speed in centimeters per second
+                        type: integer
+                    vn:
+                        description: GPS velocity in north direction in centimeters per second
+                        type: integer
+                    ve:
+                        description: GPS velocity in east direction in centimeters per second
+                        type: integer
+                    vd:
+                        description: GPS velocity in down direction in centimeters per second
+                        type: integer
+                    cog:
+                        description: Course over ground in degrees
+                        type: integer
+                    satellites_visible:
+                        description: Number of satellites visible. This is hardcoded to 13 for our HIL GPS.
+                        type: integer
+                        minimum: 0
+                    heading:
+                        description: Custom heading field. This is the heading in degrees * 100.
+                        type: integer

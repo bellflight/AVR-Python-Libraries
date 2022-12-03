@@ -690,7 +690,7 @@ serial = ["pyserial"]
 [metadata]
 lock-version = "1.1"
     python-versions = ">=3.8,<3.12"
-content-hash = "5c738dc0f1dba698df2fafd136e0d5e2f6a197801b6b09b4b9856bcf1bee7bbb"
+content-hash = "b7ad78b822df04200b38464075f66a7969d6462bc79e2fd0d2b15970aa2a7d31"
 
 [metadata.files]
 argcomplete = [
