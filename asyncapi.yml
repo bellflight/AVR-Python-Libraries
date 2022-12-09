@@ -73,11 +73,16 @@ channels:
             message:
                 $ref: "#/components/messages/AVRFCMBattery"
             description: "Reports battery information from the flight controller."
-    avr/fcm/status:
+    avr/fcm/armed:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRFCMStatus"
-            description: "Reports general status flight controller."
+                $ref: "#/components/messages/AVRFCMArmed"
+            description: "Reports armed status of the flight controller."
+    avr/fcm/flight_mode:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMFlightMode"
+            description: "Reports current flight mode of the flight controller."
     avr/fcm/position/local:
         subscribe:
             message:
@@ -138,10 +143,10 @@ channels:
             message:
                 $ref: "#/components/messages/AVRFusionHeading"
             description: "Reports the computed heading of the drone from our sensor fusion."
-    avr/fusion/climbrate:
+    avr/fusion/climb_rate:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRFusionClimbrate"
+                $ref: "#/components/messages/AVRFusionClimbRate"
             description: "Reports the computed rate of climb of the drone from our sensor fusion."
     avr/fusion/attitude/quaternion:
         subscribe:
@@ -158,18 +163,67 @@ channels:
             message:
                 $ref: "#/components/messages/AVRFusionHILGPSMessage"
             description: This is the raw data that will get converted to a MAVLink message and sent to the flight controller for HIL GPS. <https://mavlink.io/en/messages/common.html#HIL_GPS>
+    avr/vio/resync:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOResync"
+            description: Reports significant position differences from the tracking camera, and detected AprilTags at known positions.
+    avr/vio/position/local:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOPositionLocal"
+            description: "Reports the measured position of the drone in local coordinates from the tracking camera."
+    avr/vio/velocity:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOVelocity"
+            description: "Reports the measured velocity of the drone in local coordinates from the tracking camera."
+    avr/vio/attitude/euler/radians:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOAttitudeEulerRadians"
+            description: "Reports the measured attitude of the drone from the tracking camera in Euler radians."
+    avr/vio/attitude/euler/quaternion:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOAttitudeQuaternion"
+            description: "Reports the measured attitude of the drone from the tracking camera as a Quaternion."
+    avr/vio/heading:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOHeading"
+            description: "Reports the measured heading of the drone from the tracking camera."
+    avr/vio/confidence:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOConfidence"
+            description: "Reports the tracking camera confidence."
+    avr/apriltags/vehicle_position:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAprilTagsVehiclePosition"
+            description: "Reports current best AprilTag prediction of vehicle position."
+    avr/apriltags/raw:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAprilTagsRaw"
+            description: "Reports raw AprilTag data."
+
+
 components:
     schemas:
         wrgb:
-            description: "A list of 4 integers between 0 and 255 to set the base color of the LEDs. This is in order of Red, Green, Blue, and Alpha"
+            description: "Color values for the red, green, blue, and alpha channels, respectively."
             type: array
             minItems: 4
             maxItems: 4
             items:
-                description: "Color value."
+                description: "Color value. 0 is less color of a channel (black) and and 255 is more color of a channel (white)."
                 type: integer
+                minimum: 0
+                maximum: 255
         servo:
-            description: "ID of the servo. This is 0-indexed."
+            description: "Servo ID. This is 0-indexed."
             type: integer
             minimum: 0
             maximum: 15
@@ -205,65 +259,70 @@ components:
         d:
             description: "Z position in a local North/East/Down coordinate system in meters."
             type: number
-        vN:
+        Vn:
             description: "X velocity in a local North/East/Down coordinate system in meters per second."
             type: number
-        vE:
+        Ve:
             description: "Y velocity in a local North/East/Down coordinate system in meters per second."
             type: number
-        vD:
+        Vd:
             description: "Z velocity in a local North/East/Down coordinate system in meters per second."
             type: number
         quat_w:
-            description: "Quaternion w value"
+            description: "Quaternion w value."
             type: number
             minimum: -1
             maximum: 1
         quat_x:
-            description: "Quaternion x value"
+            description: "Quaternion x value."
             type: number
             minimum: -1
             maximum: 1
         quat_y:
-            description: "Quaternion y value"
+            description: "Quaternion y value."
             type: number
             minimum: -1
             maximum: 1
         quat_z:
-            description: "Quaternion z value"
+            description: "Quaternion z value."
             type: number
             minimum: -1
             maximum: 1
         roll:
-            description: "Roll in degrees"
+            description: "Roll in degrees."
             type: number
             minimum: -360
             maximum: 360
         pitch:
-            description: "Pitch in degrees"
+            description: "Pitch in degrees."
             type: number
             minimum: -360
             maximum: 360
         yaw:
-            description: "Yaw in degrees"
+            description: "Yaw in degrees."
             type: number
             minimum: -360
             maximum: 360
         psi:
-            description: "Roll in radians"
+            description: "Roll in radians."
             type: number
             minimum: -6.2831853
             maximum: 6.2831853
         theta:
-            description: "Pitch in radians"
+            description: "Pitch in radians."
             type: number
             minimum: -6.2831853
             maximum: 6.2831853
         phi:
-            description: "Yaw in radians"
+            description: "Yaw in radians."
             type: number
             minimum: -6.2831853
             maximum: 6.2831853
+        tag_id:
+            description: "AprilTag ID."
+            type: number
+            minimum: 0
+
     messages:
         AVRPCMColorSet:
             payload:
@@ -425,18 +484,24 @@ components:
                         type: number
                         minimum: 0
                         maximum: 100
-
-        AVRFCMStatus:
+        AVRFCMArmed:
             payload:
                 type: object
                 additionalProperties: false
                 required:
                     - armed
-                    - flight_mode
                 properties:
                     armed:
                         description: "Indicates if the drone is currently armed"
                         type: boolean
+
+        AVRFCMFlightMode:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - flight_mode
+                properties:
                     flight_mode:
                         description: "Active flight mode"
                         type: string
@@ -531,16 +596,16 @@ components:
                 type: object
                 additionalProperties: false
                 required:
-                    - vN
-                    - vE
-                    - vD
+                    - Vn
+                    - Ve
+                    - Vd
                 properties:
-                    vN:
-                        $ref: "#/components/schemas/vN"
-                    vE:
-                        $ref: "#/components/schemas/vE"
-                    vD:
-                        $ref: "#/components/schemas/vD"
+                    Vn:
+                        $ref: "#/components/schemas/Vn"
+                    Ve:
+                        $ref: "#/components/schemas/Ve"
+                    Vd:
+                        $ref: "#/components/schemas/Vd"
 
         AVRFCMGPSInfo:
             payload:
@@ -587,16 +652,16 @@ components:
                 type: object
                 additionalProperties: false
                 required:
-                    - vN
-                    - vE
-                    - vD
+                    - Vn
+                    - Ve
+                    - Vd
                 properties:
-                    vN:
-                        $ref: "#/components/schemas/vN"
-                    vE:
-                        $ref: "#/components/schemas/vE"
-                    vD:
-                        $ref: "#/components/schemas/vD"
+                    Vn:
+                        $ref: "#/components/schemas/Vn"
+                    Ve:
+                        $ref: "#/components/schemas/Ve"
+                    Vd:
+                        $ref: "#/components/schemas/Vd"
 
         AVRFusionPositionGlobal:
             payload:
@@ -649,14 +714,14 @@ components:
                         minimum: 0
                         maximum: 360
 
-        AVRFusionClimbrate:
+        AVRFusionClimbRate:
             payload:
                 type: object
                 additionalProperties: false
                 required:
-                    - climbrate
+                    - climb_rate
                 properties:
-                    climbrate:
+                    climb_rate:
                         description: Rate of climb in feet per second.
                         type: number
 
@@ -760,3 +825,207 @@ components:
                     heading:
                         description: Custom heading field. This is the heading in degrees * 100.
                         type: integer
+
+        AVRVIOResync:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - "n"
+                    - e
+                    - d
+                    - hdg
+                properties:
+                    hdg:
+                        description: "Heading difference in degrees."
+                        type: number
+                    "n":
+                        description: "X position difference in a local North/East/Down coordinate system in meters."
+                        type: number
+                    e:
+                        description: "Y position difference in a local North/East/Down coordinate system in meters."
+                        type: number
+                    d:
+                        description: "Z position difference in a local North/East/Down coordinate system in meters."
+                        type: number
+
+        AVRVIOPositionLocal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - "n"
+                    - e
+                    - d
+                properties:
+                    "n":
+                        $ref: "#/components/schemas/n"
+                    e:
+                        $ref: "#/components/schemas/e"
+                    d:
+                        $ref: "#/components/schemas/d"
+
+        AVRVIOVelocity:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - Vn
+                    - Ve
+                    - Vd
+                properties:
+                    Vn:
+                        $ref: "#/components/schemas/Vn"
+                    Ve:
+                        $ref: "#/components/schemas/Ve"
+                    Vd:
+                        $ref: "#/components/schemas/Vd"
+
+        AVRVIOAttitudeEulerRadians:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - psi
+                    - theta
+                    - phi
+                properties:
+                    psi:
+                        $ref: "#/components/schemas/psi"
+                    theta:
+                        $ref: "#/components/schemas/theta"
+                    phi:
+                        $ref: "#/components/schemas/phi"
+
+        AVRVIOAttitudeQuaternion:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - w
+                    - x
+                    - "y"
+                    - z
+                properties:
+                    x:
+                        $ref: "#/components/schemas/quat_x"
+                    "y":
+                        $ref: "#/components/schemas/quat_y"
+                    z:
+                        $ref: "#/components/schemas/quat_z"
+                    w:
+                        $ref: "#/components/schemas/quat_w"
+
+        AVRVIOHeading:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - hdg
+                properties:
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
+
+        AVRVIOConfidence:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - tracking
+                properties:
+                    tracker:
+                        description: "Tracking confidence percentage. Higher number is better."
+                        type: number
+                        minimum: 0
+                        maximum: 100
+
+        AVRAprilTagsVehiclePosition:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - tag_id
+                    - "n"
+                    - e
+                    - d
+                    - hdg
+                properties:
+                    tag_id:
+                        $ref: "#/components/schemas/tag_id"
+                    "n":
+                        description: "The North position of the vehicle relative to the world origin in world frame in centimeters."
+                        type: number
+                    e:
+                        description: "The East position of the vehicle relative to the world origin in world frame in centimeters."
+                        type: number
+                    d:
+                        description: "The Down position of the vehicle relative to the world origin in world frame in centimeters."
+                        type: number
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
+
+        AVRAprilTagsRaw:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - apriltags
+                properties:
+                    apriltags:
+                        type: array
+                        items:
+                            type: object
+                            additionalProperties: false
+                            required:
+                                - tag_id
+                                - x
+                                - "y"
+                                - z
+                                - rotation
+                            properties:
+                                tag_id:
+                                    $ref: "#/components/schemas/tag_id"
+                                x:
+                                    description: "The position in meters of the camera relative to the AprilTag's X frame."
+                                    type: number
+                                "y":
+                                    description: "The position in meters of the camera relative to the AprilTag's Y frame."
+                                    type: number
+                                z:
+                                    description: "The position in meters of the camera relative to the AprilTag's Z frame."
+                                    type: number
+                                rotation:
+                                    description: "3x3 rotation matrix."
+                                    type: array
+                                    minItems: 3
+                                    maxItems: 3
+                                    items:
+                                        type: array
+                                        minItems: 3
+                                        maxItems: 3
+                                        items:
+                                            type: number
+                                            minimum: -1
+                                            maximum: 1
+
+        AVRThermalReading:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - data
+                properties:
+                    data:
+                        description: |
+                            The raw data from the thermal camera are integer values from an 8x8 grid of pixels. This data is then converted into a `bytearray` and base64 encoded. Any example of how to unpack this data:
+
+                            ```python
+                            import base64
+                            import json
+
+                            data = json.loads(payload)["data"]
+                            base64_decoded = data.encode("utf-8")
+                            as_bytes = base64.b64decode(base64_decoded)
+                            pixel_ints = list(bytearray(as_bytes))
+                            ```
+                        type: string
