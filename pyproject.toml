@@ -13,6 +13,7 @@
     exclude = [
         "bell/**/*.j2",
         "bell/**/*.json",
+        "bell/**/*.yml",
         "bell/**/*.jsonc",
         "bell/**/.gitignore",
     ]
@@ -21,12 +22,11 @@
 [tool.poetry.dependencies]
     python    = ">=3.8,<3.12"
     loguru    = "^0.6.0"
+    paho-mqtt = "^1.6.1"
     pyserial  = { version = "^3.5", optional = true }
-    paho-mqtt = { version = "^1.6.1", optional = true }
 
 [tool.poetry.extras]
     serial = ["pyserial"]
-    mqtt   = ["paho-mqtt"]
 
 [tool.poetry.group.dev.dependencies]
     # testing

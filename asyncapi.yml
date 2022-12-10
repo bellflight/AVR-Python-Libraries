@@ -198,17 +198,76 @@ channels:
             message:
                 $ref: "#/components/messages/AVRVIOConfidence"
             description: "Reports the tracking camera confidence."
-    avr/apriltags/vehicle_position:
+    avr/apriltags/drone_position:
         subscribe:
             message:
                 $ref: "#/components/messages/AVRAprilTagsVehiclePosition"
-            description: "Reports current best AprilTag prediction of vehicle position."
+            description: "Reports current best AprilTag prediction of drone position."
     avr/apriltags/raw:
         subscribe:
             message:
                 $ref: "#/components/messages/AVRAprilTagsRaw"
             description: "Reports raw AprilTag data."
-
+    avr/apriltags/visible:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAprilTagsVisible"
+            description: "Reports data about visible AprilTags in a consumable format."
+    avr/apriltags/status:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAprilTagsStatus"
+            description: "Reports AprilTag processing status."
+    avr/status/led/pcm:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRStatusLEDPCM"
+            description: "Signals the PCM status LED to illuminate."
+    avr/status/led/vio:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRStatusLEDVIO"
+            description: "Signals the PCM status LED to illuminate."
+    avr/status/led/apriltags:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRStatusLEDAprilTags"
+            description: "Signals the PCM status LED to illuminate."
+    avr/status/led/fcm:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRStatusLEDFCM"
+            description: "Signals the PCM status LED to illuminate."
+    avr/status/led/thermal:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRStatusLEDThermal"
+            description: "Signals the PCM status LED to illuminate."
+    avr/thermal/reading:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRThermalReading"
+            description: "Reports raw data from the thermal camera."
+    avr/autonomous/enable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAutonomousEnable"
+            description: "Enables autonomous mode. This is not used by any Bell code, but available to students to subscribe to."
+    avr/autonomous/disable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAutonomousDisable"
+            description: "Disables autonomous mode. This is not used by any Bell code, but available to students to subscribe to."
+    avr/autonomous/building/enable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAutonomousBuildingEnable"
+            description: "Enables building payload drop. This is not used by any Bell code, but available to students to subscribe to."
+    avr/autonomous/building/disable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRAutonomousBuildingDisable"
+            description: "Disables building payload drop. This is not used by any Bell code, but available to students to subscribe to."
 
 components:
     schemas:
@@ -242,31 +301,43 @@ components:
             type: number
             minimum: -180
             maximum: 180
-        takeoff_alt:
+        takeoff_alt_meters:
             description: "Altitude relative to takeoff altitude in meters."
+            type: number
+        home_alt_meters:
+            description: "Altitude relative to the home position in meters."
             type: number
         hdg:
             description: "Heading in degrees."
             type: number
             minimum: 0
             maximum: 360
-        "n":
-            description: "X position in a local North/East/Down coordinate system in meters."
+        n_meters:
+            description: "X position in a North/East/Down coordinate system in meters."
             type: number
-        e:
-            description: "Y position in a local North/East/Down coordinate system in meters."
+        e_meters:
+            description: "Y position in a North/East/Down coordinate system in meters."
             type: number
-        d:
-            description: "Z position in a local North/East/Down coordinate system in meters."
+        d_meters:
+            description: "Z position in a North/East/Down coordinate system in meters."
             type: number
-        Vn:
-            description: "X velocity in a local North/East/Down coordinate system in meters per second."
+        x_centimeters:
+            description: "X position in a North/East/Down coordinate system in centimeters."
             type: number
-        Ve:
-            description: "Y velocity in a local North/East/Down coordinate system in meters per second."
+        y_centimeters:
+            description: "Y position in a North/East/Down coordinate system in centimeters."
             type: number
-        Vd:
-            description: "Z velocity in a local North/East/Down coordinate system in meters per second."
+        z_centimeters:
+            description: "Z position in a North/East/Down coordinate system in centimeters."
+            type: number
+        Vn_meters_per_second:
+            description: "X velocity in a North/East/Down coordinate system in meters per second."
+            type: number
+        Ve_meters_per_second:
+            description: "Y velocity in a North/East/Down coordinate system in meters per second."
+            type: number
+        Vd_meters_per_second:
+            description: "Z velocity in a North/East/Down coordinate system in meters per second."
             type: number
         quat_w:
             description: "Quaternion w value."
@@ -322,6 +393,11 @@ components:
             description: "AprilTag ID."
             type: number
             minimum: 0
+        building:
+            description: "Building ID. This is 0-indexed."
+            type: integer
+            minimum: 0
+            maximum: 15
 
     messages:
         AVRPCMColorSet:
@@ -526,6 +602,7 @@ components:
         AVRFCMPositionLocal:
             payload:
                 type: object
+                description: "The local position of the drone."
                 additionalProperties: false
                 required:
                     - "n"
@@ -533,15 +610,16 @@ components:
                     - d
                 properties:
                     "n":
-                        $ref: "#/components/schemas/n"
+                        $ref: "#/components/schemas/n_meters"
                     e:
-                        $ref: "#/components/schemas/e"
+                        $ref: "#/components/schemas/e_meters"
                     d:
-                        $ref: "#/components/schemas/d"
+                        $ref: "#/components/schemas/d_meters"
 
         AVRFCMPositionGlobal:
             payload:
                 type: object
+                description: "The global position of the drone."
                 additionalProperties: false
                 required:
                     - lat
@@ -554,7 +632,7 @@ components:
                     lon:
                         $ref: "#/components/schemas/lon"
                     alt:
-                        $ref: "#/components/schemas/takeoff_alt"
+                        $ref: "#/components/schemas/takeoff_alt_meters"
                     hdg:
                         $ref: "#/components/schemas/hdg"
 
@@ -572,8 +650,7 @@ components:
                     lon:
                         $ref: "#/components/schemas/lon"
                     alt:
-                        description: "Altitude relative to the home position in meters."
-                        type: number
+                        $ref: "#/components/schemas/home_alt_meters"
 
         AVRFCMAttitudeEulerDegrees:
             payload:
@@ -601,11 +678,11 @@ components:
                     - Vd
                 properties:
                     Vn:
-                        $ref: "#/components/schemas/Vn"
+                        $ref: "#/components/schemas/Vn_meters_per_second"
                     Ve:
-                        $ref: "#/components/schemas/Ve"
+                        $ref: "#/components/schemas/Ve_meters_per_second"
                     Vd:
-                        $ref: "#/components/schemas/Vd"
+                        $ref: "#/components/schemas/Vd_meters_per_second"
 
         AVRFCMGPSInfo:
             payload:
@@ -634,6 +711,7 @@ components:
         AVRFusionPositionLocal:
             payload:
                 type: object
+                description: "The local position of the drone."
                 additionalProperties: false
                 required:
                     - "n"
@@ -641,11 +719,11 @@ components:
                     - d
                 properties:
                     "n":
-                        $ref: "#/components/schemas/n"
+                        $ref: "#/components/schemas/n_meters"
                     e:
-                        $ref: "#/components/schemas/e"
+                        $ref: "#/components/schemas/e_meters"
                     d:
-                        $ref: "#/components/schemas/d"
+                        $ref: "#/components/schemas/d_meters"
 
         AVRFusionVelocity:
             payload:
@@ -657,15 +735,16 @@ components:
                     - Vd
                 properties:
                     Vn:
-                        $ref: "#/components/schemas/Vn"
+                        $ref: "#/components/schemas/Vn_meters_per_second"
                     Ve:
-                        $ref: "#/components/schemas/Ve"
+                        $ref: "#/components/schemas/Ve_meters_per_second"
                     Vd:
-                        $ref: "#/components/schemas/Vd"
+                        $ref: "#/components/schemas/Vd_meters_per_second"
 
         AVRFusionPositionGlobal:
             payload:
                 type: object
+                description: "The global position of the drone."
                 additionalProperties: false
                 required:
                     - lat
@@ -678,7 +757,7 @@ components:
                     lon:
                         $ref: "#/components/schemas/lon"
                     alt:
-                        $ref: "#/components/schemas/takeoff_alt"
+                        $ref: "#/components/schemas/takeoff_alt_meters"
 
         AVRFusionGroundspeed:
             payload:
@@ -829,6 +908,7 @@ components:
         AVRVIOResync:
             payload:
                 type: object
+                description: "Position *difference* of the drone, from where the drone thinks it is, to where it really is."
                 additionalProperties: false
                 required:
                     - "n"
@@ -837,21 +917,18 @@ components:
                     - hdg
                 properties:
                     hdg:
-                        description: "Heading difference in degrees."
-                        type: number
+                        $ref: "#/components/schemas/hdg"
                     "n":
-                        description: "X position difference in a local North/East/Down coordinate system in meters."
-                        type: number
+                        $ref: "#/components/schemas/n_meters"
                     e:
-                        description: "Y position difference in a local North/East/Down coordinate system in meters."
-                        type: number
+                        $ref: "#/components/schemas/e_meters"
                     d:
-                        description: "Z position difference in a local North/East/Down coordinate system in meters."
-                        type: number
+                        $ref: "#/components/schemas/d_meters"
 
         AVRVIOPositionLocal:
             payload:
                 type: object
+                description: "Local position of the drone."
                 additionalProperties: false
                 required:
                     - "n"
@@ -859,11 +936,11 @@ components:
                     - d
                 properties:
                     "n":
-                        $ref: "#/components/schemas/n"
+                        $ref: "#/components/schemas/n_meters"
                     e:
-                        $ref: "#/components/schemas/e"
+                        $ref: "#/components/schemas/e_meters"
                     d:
-                        $ref: "#/components/schemas/d"
+                        $ref: "#/components/schemas/d_meters"
 
         AVRVIOVelocity:
             payload:
@@ -875,11 +952,11 @@ components:
                     - Vd
                 properties:
                     Vn:
-                        $ref: "#/components/schemas/Vn"
+                        $ref: "#/components/schemas/Vn_meters_per_second"
                     Ve:
-                        $ref: "#/components/schemas/Ve"
+                        $ref: "#/components/schemas/Ve_meters_per_second"
                     Vd:
-                        $ref: "#/components/schemas/Vd"
+                        $ref: "#/components/schemas/Vd_meters_per_second"
 
         AVRVIOAttitudeEulerRadians:
             payload:
@@ -942,25 +1019,23 @@ components:
         AVRAprilTagsVehiclePosition:
             payload:
                 type: object
+                description: "Position of the drone relative to the world origin in world frame."
                 additionalProperties: false
                 required:
                     - tag_id
-                    - "n"
-                    - e
-                    - d
+                    - x
+                    - "y"
+                    - z
                     - hdg
                 properties:
                     tag_id:
                         $ref: "#/components/schemas/tag_id"
-                    "n":
-                        description: "The North position of the vehicle relative to the world origin in world frame in centimeters."
-                        type: number
-                    e:
-                        description: "The East position of the vehicle relative to the world origin in world frame in centimeters."
-                        type: number
-                    d:
-                        description: "The Down position of the vehicle relative to the world origin in world frame in centimeters."
-                        type: number
+                    x:
+                        $ref: "#/components/schemas/x_centimeters"
+                    "y":
+                        $ref: "#/components/schemas/y_centimeters"
+                    z:
+                        $ref: "#/components/schemas/z_centimeters"
                     hdg:
                         $ref: "#/components/schemas/hdg"
 
@@ -1008,6 +1083,107 @@ components:
                                             minimum: -1
                                             maximum: 1
 
+        AVRAprilTagsVisible:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - apriltags
+                properties:
+                    apriltags:
+                        type: array
+                        items:
+                            type: object
+                            additionalProperties: false
+                            required:
+                                - tag_id
+                                - horizontal_distance
+                                - vertical_distance
+                                - angle
+                                - hdg
+                                - relative_position
+                            properties:
+                                tag_id:
+                                    $ref: "#/components/schemas/tag_id"
+                                horizontal_distance:
+                                    type: number
+                                    description: "The horizontal scalar distance from the drone to AprilTag, in centimeters."
+                                vertical_distance:
+                                    type: number
+                                    description: "The horizontal scalar distance from the drone to AprilTag, in centimeters."
+                                angle:
+                                    type: number
+                                    description: "The angle formed by the vector pointing from the drones body to the AprilTag in world frame relative to world-north."
+                                hdg:
+                                    $ref: "#/components/schemas/hdg"
+                                relative_position:
+                                    type: object
+                                    description: "The relative position of the drone relative to the AprilTag in world frame in centimeters."
+                                    additionalProperties: false
+                                    required:
+                                        - x
+                                        - "y"
+                                        - z
+                                    properties:
+                                        x:
+                                            $ref: "#/components/schemas/x_centimeters"
+                                        "y":
+                                            $ref: "#/components/schemas/y_centimeters"
+                                        z:
+                                            $ref: "#/components/schemas/z_centimeters"
+                                absolute_position:
+                                    type: object
+                                    description: "The position of the drone in world frame in centimeters. If the tag has no truth data, this will not be present in the output."
+                                    additionalProperties: false
+                                    required:
+                                        - x
+                                        - "y"
+                                        - z
+                                    properties:
+                                        x:
+                                            $ref: "#/components/schemas/x_centimeters"
+                                        "y":
+                                            $ref: "#/components/schemas/y_centimeters"
+                                        z:
+                                            $ref: "#/components/schemas/z_centimeters"
+
+        AVRAprilTagsStatus:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - frames_per_second
+                properties:
+                    frames_per_second:
+                        description: Number of frames of video data processed in the last second
+                        type: integer
+                        minimum: 0
+
+        AVRStatusLEDPCM:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRStatusLEDVIO:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRStatusLEDAprilTags:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRStatusLEDFCM:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRStatusLEDThermal:
+            payload:
+                type: object
+                additionalProperties: false
+
         AVRThermalReading:
             payload:
                 type: object
@@ -1029,3 +1205,33 @@ components:
                             pixel_ints = list(bytearray(as_bytes))
                             ```
                         type: string
+
+        AVRAutonomousEnable:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRAutonomousDisable:
+            payload:
+                type: object
+                additionalProperties: false
+
+        AVRAutonomousBuildingEnable:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - building
+                properties:
+                    building:
+                        $ref: "#/components/schemas/building"
+
+        AVRAutonomousBuildingDisable:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - building
+                properties:
+                    building:
+                        $ref: "#/components/schemas/building"
