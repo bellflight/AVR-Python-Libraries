@@ -1,7 +1,7 @@
 asyncapi: 2.5.0
 info:
     title: "Bell AVR MQTT Message Spec"
-    version: "1.0"
+    version: "XYZ" # don't touch, this will be automatically updated based on pyproject.toml
 channels:
     avr/pcm/color/set:
         publish:
@@ -1010,7 +1010,7 @@ components:
                 required:
                     - tracking
                 properties:
-                    tracker:
+                    tracking:
                         description: "Tracking confidence percentage. Higher number is better."
                         type: number
                         minimum: 0
