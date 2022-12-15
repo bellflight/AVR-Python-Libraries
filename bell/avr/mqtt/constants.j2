@@ -1,24 +1,27 @@
+# This file is automatically @generated. DO NOT EDIT!
+# fmt: off
+
 from typing import Type, TypedDict
 
 from .payloads import (
-{%- for message in messages %}
-    {{ message.name }}Payload,
-    _{{ message.name }}Callable,
+{%- for topic, klass in topic_class.items() %}
+    {{ klass }},
+    _{{ klass }}Callable,
 {%- endfor %}
 )
 
 
 # List of MQTT topics
 MQTTTopics = [
-{%- for message in messages %}
-    "{{ message.topic }}",
+{%- for topic, klass in topic_class.items() %}
+    "{{ topic }}",
 {%- endfor %}
 ]
 
 # List of MQTT payload types
 MQTTPayloads = [
-{%- for message in messages %}
-    {{ message.name }}Payload,
+{%- for topic, klass in topic_class.items() %}
+    {{ klass }},
 {%- endfor %}
 ]
 
@@ -26,8 +29,8 @@ MQTTPayloads = [
 _MQTTTopicCallableTypedDict = TypedDict(
     "_MQTTTopicCallableTypedDict",
     {
-{%- for message in messages %}
-        "{{ message.topic }}": _{{ message.name }}Callable,
+{%- for topic, klass in topic_class.items() %}
+        "{{ topic }}": _{{ klass }}Callable,
 {%- endfor %}
     },
     total=False
@@ -35,8 +38,8 @@ _MQTTTopicCallableTypedDict = TypedDict(
 
 # Actual dictionary of topics to callback function signature
 MQTTTopicCallable: _MQTTTopicCallableTypedDict = {
-{%- for message in messages %}
-    "{{ message.topic }}": _{{ message.name }}Callable,
+{%- for topic, klass in topic_class.items() %}
+    "{{ topic }}": _{{ klass }}Callable,
 {%- endfor %}
 }
 
@@ -45,8 +48,8 @@ MQTTTopicCallable: _MQTTTopicCallableTypedDict = {
 _MQTTTopicPayloadTypedDict = TypedDict(
     "_MQTTTopicPayloadTypedDict",
     {
-{%- for message in messages %}
-        "{{ message.topic }}": {{ message.name }}Payload,
+{%- for topic, klass in topic_class.items() %}
+        "{{ topic }}": {{ klass }},
 {%- endfor %}
     },
     total=False
@@ -56,8 +59,8 @@ _MQTTTopicPayloadTypedDict = TypedDict(
 _MQTTTopicPayloadTypeTypedDict = TypedDict(
     "_MQTTTopicPayloadTypeTypedDict",
     {
-{%- for message in messages %}
-        "{{ message.topic }}": Type[{{ message.name }}Payload],
+{%- for topic, klass in topic_class.items() %}
+        "{{ topic }}": Type[{{ klass }}],
 {%- endfor %}
     },
     total=False
@@ -65,7 +68,7 @@ _MQTTTopicPayloadTypeTypedDict = TypedDict(
 
 # Actual dictionary of topics to associated payload types
 MQTTTopicPayload: _MQTTTopicPayloadTypeTypedDict = {
-{%- for message in messages %}
-    "{{ message.topic }}": {{ message.name }}Payload,
+{%- for topic, klass in topic_class.items() %}
+    "{{ topic }}": {{ klass }},
 {%- endfor %}
 }

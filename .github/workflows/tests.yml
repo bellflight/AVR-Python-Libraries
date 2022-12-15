@@ -28,9 +28,10 @@ jobs:
           cache: poetry
 
       - name: Install Python Dependencies
-        run: |
-          poetry install --extras "serial" --extras "mqtt"
-          poetry run python build.py --docs
+        run: poetry install --all-extras
+
+      - name: Generate Code
+        run: poetry run python build.py
 
       - name: Run Tests
         run: poetry run pytest -v
@@ -46,16 +47,17 @@ jobs:
       - name: Setup Poetry
         uses: Gr1N/setup-poetry@v7
 
-      - name: Setup Python 3.10
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version-file: .python-version
           cache: poetry
 
       - name: Install Python Dependencies
-        run: |
-          poetry install
-          poetry run python build.py --docs
+        run: poetry install --all-extras
+
+      - name: Generate Code
+        run: poetry run python build.py
 
       - name: Run Black
         run: poetry run python -m black . --check
@@ -77,7 +79,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: "16"
+          node-version-file: .node-version
           cache: npm
 
       - name: Setup Poetry
@@ -91,9 +93,10 @@ jobs:
           cache: poetry
 
       - name: Install Python Dependencies
-        run: |
-          poetry install --extras "serial" --extras "mqtt"
-          poetry run python build.py --docs
+        run: poetry install --all-extras
+
+      - name: Generate Code
+        run: poetry run python build.py
 
       - name: Install Node Dependencies
         run: npm install
@@ -104,7 +107,7 @@ jobs:
       - name: Run Pyleft
         run: poetry run python -m pyleft .
 
-  version-number:
+  docs:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
 
@@ -112,49 +115,36 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: npm
+
       - name: Setup Poetry
         uses: Gr1N/setup-poetry@v7
 
-      - name: Setup Python 3.10
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version-file: .python-version
+          cache: poetry
 
-      - name: Check Version Number
-        shell: python
-        run: |
-          import json
-          import os
-          import subprocess
+      - name: Install Python Dependencies
+        run: poetry install
 
-          release_tags_json = subprocess.check_output(
-              [
-                  "gh",
-                  "api",
-                  "graphql",
-                  "-F",
-                  f"owner={os.environ['OWNER']}",
-                  "-F",
-                  f"name={os.environ['REPO']}",
-                  "-f",
-                  "query=query($name: String!, $owner: String!) {repository(owner: $owner, name: $name) {releases(last: 10){nodes{tagName}}}}",
-              ]
-          )
+      - name: Build Docs
+        run: poetry run python build.py --docs
 
+  validate-apispec:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
-          release_tags = [
-              r["tagName"]
-              for r in json.loads(release_tags_json)["data"]["repository"]["releases"]["nodes"]
-          ]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-          poetry_version = (
-              subprocess.check_output(["poetry", "version", "--short"]).decode("utf-8").strip()
-          )
-
-          print(f"Current version: {poetry_version}")
-          print(f"Published versions: {release_tags}")
-          assert poetry_version not in release_tags
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OWNER: ${{ github.repository_owner }}
-          REPO: ${{ github.event.repository.name }}
+      - name: Validate AsyncAPI Spec
+        uses: WaleedAshraf/asyncapi-github-action@v0
+        with:
+          filepath: bell/avr/mqtt/asyncapi.yml

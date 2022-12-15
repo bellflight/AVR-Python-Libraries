@@ -8,7 +8,7 @@ on:
 
 
 jobs:
-  publish:
+  pypi-publish:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'ci skip')"
 
@@ -19,17 +19,20 @@ jobs:
       - name: Setup Poetry
         uses: Gr1N/setup-poetry@v7
 
-      - name: Setup Python 3.10
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-          cache: "poetry"
+          python-version-file: .python-version
+          cache: poetry
 
-      - name: Build
-        run: |
-          poetry install
-          poetry run python build.py --docs
-          poetry build
+      - name: Install Python Dependencies
+        run: poetry install
+
+      - name: Generate Code
+        run: poetry run python build.py
+
+      - name: Build Package
+        run: poetry build
 
       - name: Get version
         run: echo "PROJECT_VERSION=$(poetry version --short)" >> $GITHUB_ENV
@@ -49,3 +52,61 @@ jobs:
         run: poetry publish
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+
+  docs-build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    # make sure publish worked
+    needs: pypi-publish
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: npm
+
+      - name: Setup Poetry
+        uses: Gr1N/setup-poetry@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+          cache: poetry
+
+      - name: Install Python Dependencies
+        run: poetry install
+
+      - name: Build Docs
+        run: poetry run python build.py --docs
+
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v2
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs
+
+  docs-deploy:
+    runs-on: ubuntu-latest
+    # make sure build ran first
+    needs: docs-build
+
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1

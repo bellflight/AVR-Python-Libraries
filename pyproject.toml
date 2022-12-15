@@ -13,8 +13,8 @@
     exclude = [
         "bell/**/*.j2",
         "bell/**/*.json",
-        "bell/**/*.yml",
         "bell/**/*.jsonc",
+        "bell/**/*.yml",
         "bell/**/.gitignore",
     ]
     include = ["bell/**/*.pyi", "bell/**/*.py"]
@@ -22,6 +22,7 @@
 [tool.poetry.dependencies]
     python    = ">=3.8,<3.12"
     loguru    = "^0.6.0"
+    pydantic  = "^1.10.2"
     paho-mqtt = "^1.6.1"
     pyserial  = { version = "^3.5", optional = true }
 
@@ -39,10 +40,10 @@
     # linting
     pyleft = "^1.1.0"
     # building template
-    Jinja2                   = "^3.1.2"
-    datamodel-code-generator = "^0.14.0"
-    jsonref                  = "^1.0.1"
-    pyyaml                   = "^6.0"
+    Jinja2  = "^3.1.2"
+    jsonref = "^1.0.1"
+    pyyaml  = "^6.0"
+    tomli   = { version = "^2.0.1", python = "<3.11" }
 
 [tool.coverage.run]
     omit = ["*.venv*"]

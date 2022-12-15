@@ -16,17 +16,17 @@ channels:
     avr/pcm/laser/fire:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMLaserFire"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Fires the laser for a 0.25 second pulse. Has a cooldown of 0.5 seconds."
     avr/pcm/laser/on:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMLaserOn"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Turns laser on for 0.1 second every 0.5 seconds."
     avr/pcm/laser/off:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMLaserOff"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Turns off laser. Does not prevent `avr/pcm/laser/fire`."
     avr/pcm/servo/open:
         publish:
@@ -221,27 +221,27 @@ channels:
     avr/status/led/pcm:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRStatusLEDPCM"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Signals the PCM status LED to illuminate."
     avr/status/led/vio:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRStatusLEDVIO"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Signals the PCM status LED to illuminate."
     avr/status/led/apriltags:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRStatusLEDAprilTags"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Signals the PCM status LED to illuminate."
     avr/status/led/fcm:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRStatusLEDFCM"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Signals the PCM status LED to illuminate."
     avr/status/led/thermal:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRStatusLEDThermal"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Signals the PCM status LED to illuminate."
     avr/thermal/reading:
         subscribe:
@@ -251,12 +251,12 @@ channels:
     avr/autonomous/enable:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRAutonomousEnable"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Enables autonomous mode. This is not used by any Bell code, but available to students to subscribe to."
     avr/autonomous/disable:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRAutonomousDisable"
+                $ref: "#/components/messages/AVREmptyMessage"
             description: "Disables autonomous mode. This is not used by any Bell code, but available to students to subscribe to."
     avr/autonomous/building/enable:
         subscribe:
@@ -425,17 +425,7 @@ components:
                         minimum: 0
                         default: 0.5
 
-        AVRPCMLaserFire:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRPCMLaserOn:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRPCMLaserOff:
+        AVREmptyMessage:
             payload:
                 type: object
                 additionalProperties: false
@@ -1159,31 +1149,6 @@ components:
                         type: integer
                         minimum: 0
 
-        AVRStatusLEDPCM:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRStatusLEDVIO:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRStatusLEDAprilTags:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRStatusLEDFCM:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRStatusLEDThermal:
-            payload:
-                type: object
-                additionalProperties: false
-
         AVRThermalReading:
             payload:
                 type: object
@@ -1205,16 +1170,6 @@ components:
                             pixel_ints = list(bytearray(as_bytes))
                             ```
                         type: string
-
-        AVRAutonomousEnable:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRAutonomousDisable:
-            payload:
-                type: object
-                additionalProperties: false
 
         AVRAutonomousBuildingEnable:
             payload:
