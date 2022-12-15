@@ -31,22 +31,22 @@ channels:
     avr/pcm/servo/open:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMServoOpen"
+                $ref: "#/components/messages/AVRPCMServo"
             description: "Opens a specific servo."
     avr/pcm/servo/close:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMServoClose"
+                $ref: "#/components/messages/AVRPCMServo"
             description: "Closes a specific servo."
     avr/pcm/servo/pwm/min:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMServoPWMMin"
+                $ref: "#/components/messages/AVRPCMServoPWM"
             description: "Set the minimum pulse width of a specific servo."
     avr/pcm/servo/pwm/max:
         publish:
             message:
-                $ref: "#/components/messages/AVRPCMServoPWMMax"
+                $ref: "#/components/messages/AVRPCMServoPWM"
             description: "Set the maximum pulse width of a specific servo."
     avr/pcm/servo/percent:
         publish:
@@ -400,6 +400,11 @@ components:
             maximum: 15
 
     messages:
+        AVREmptyMessage:
+            payload:
+                type: object
+                additionalProperties: false
+
         AVRPCMColorSet:
             payload:
                 type: object
@@ -425,12 +430,7 @@ components:
                         minimum: 0
                         default: 0.5
 
-        AVREmptyMessage:
-            payload:
-                type: object
-                additionalProperties: false
-
-        AVRPCMServoOpen:
+        AVRPCMServo:
             payload:
                 type: object
                 additionalProperties: false
@@ -440,30 +440,7 @@ components:
                     servo:
                         $ref: "#/components/schemas/servo"
 
-        AVRPCMServoClose:
-            payload:
-                type: object
-                additionalProperties: false
-                required:
-                    - servo
-                properties:
-                    servo:
-                        $ref: "#/components/schemas/servo"
-
-        AVRPCMServoPWMMin:
-            payload:
-                type: object
-                additionalProperties: false
-                required:
-                    - servo
-                    - pulse
-                properties:
-                    servo:
-                        $ref: "#/components/schemas/servo"
-                    pulse:
-                        $ref: "#/components/schemas/pulse"
-
-        AVRPCMServoPWMMax:
+        AVRPCMServoPWM:
             payload:
                 type: object
                 additionalProperties: false

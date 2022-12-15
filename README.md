@@ -27,27 +27,26 @@ These are MQTT utilities that are used to have a consistent messaging protocol
 throughout all the AVR software modules.
 
 The first part of this are the payloads for the MQTT messages themselves. As AVR
-exclusively uses JSON, these are all
-[`TypedDict`](https://docs.python.org/3/library/typing.html#typing.TypedDict)s
+exclusively uses JSON, these are all [Pydantic](https://docs.pydantic.dev/) classes
 that have all of the required fields for a message.
 
 Example:
 
 ```python
-from bell.avr.mqtt.payloads import AvrPcmSetBaseColorPayload
+from bell.avr.mqtt.payloads import AVRPCMColorSet
 
-payload = AvrPcmSetBaseColorPayload((128, 232, 142, 0))
+payload = AVRPCMColorSet((128, 232, 142, 0))
 ```
 
 The second part of the MQTT libraries, is the `MQTTModule` class.
 This is a boilerplate module for AVR that makes it very easy to send
-and recieve MQTT messages and do something with them.
+and receive MQTT messages and do something with them.
 
 Example:
 
 ```python
 from bell.avr.mqtt.client import MQTTModule
-from bell.avr.mqtt.payloads import AvrFcmVelocityPayload, AvrPcmSetServoOpenClosePayload
+from bell.avr.mqtt.payloads import AVRFCMVelocity, AVRPCMServo
 
 
 class Sandbox(MQTTModule):
@@ -55,16 +54,13 @@ class Sandbox(MQTTModule):
         super().__init__()
         self.topic_map = {"avr/fcm/velocity": self.show_velocity}
 
-    def show_velocity(self, payload: AvrFcmVelocityPayload) -> None:
-        vx = payload["vX"]
-        vy = payload["vY"]
-        vz = payload["vZ"]
-        v_ms = (vx, vy, vz)
+    def show_velocity(self, payload: AvrFcmVelocity) -> None:
+        v_ms = (payload.vN, payload.vE, payload.vd)
         print(f"Velocity information: {v_ms} m/s")
 
     def open_servo(self) -> None:
-        payload = AvrPcmSetServoOpenClosePayload(servo=0, action="open")
-        self.send_message("avr/pcm/set_servo_open_close", payload)
+        payload = AVRPCMServo(servo=0)
+        self.send_message("avr/pcm/servo/open", payload)
 
 
 if __name__ == "__main__":
@@ -219,24 +215,10 @@ inside a virtual environment.
 Build the auto-generated code with `poetry run python build.py`. From here,
 you can now produce a package with `poetry build`.
 
-To add new message definitions, add entries to the `bell/avr/mqtt/asyncapi.json` file.
-The 3 parts of a new message are as follows:
+To add new message definitions, add entries to the `bell/avr/mqtt/asyncapi.yml` file.
+This is an [AsyncAPI](https://www.asyncapi.com/) definition,
+which is primarily [JSONSchema](https://json-schema.org/) with some association
+of classes and topics.
 
-1. "topic": This is the full topic path for the message. This must be all lower case and
-   start with "avr/".
-2. "payload": These are the keys of the payload for the message.
-   This is a list of key entries (see below).
-3. "docs": This is an optional list of Markdown strings that explains what this
-   message does. Each list item is a new line.
-
-The key entries for a message have the following elements:
-
-1. "key": This is the name of the key. Must be a valid Python variable name.
-2. "type": This is the data type of the key such as `Tuple[int, int, int, int]`.
-   Must be a valid Python type hint. Otherwise, this can be a list of more
-   key entries, effectively creating a nested dictionary.
-3. "docs": This is an optional list of Markdown strings that explains what the
-   key is. Each list item is a new line.
-
-The `bell/avr/mqtt/schema.json` file will help ensure the correct schema is maintained,
-assuming you are using VS Code.
+The generator that turns this definition file into Python code is the homebrew
+[build.py](build.py), so double-check that the output makes sense.

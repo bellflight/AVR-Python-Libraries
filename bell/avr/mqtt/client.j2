@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import copy
 import json
-from typing import Any, Literal, overload
+from typing import Any, Literal, Union, overload
 
 import paho.mqtt.client as mqtt
 from loguru import logger
@@ -79,8 +79,12 @@ class MQTTModule:
         if msg.topic in self.topic_map:
             # we talk JSON, no exceptions
             payload = json.loads(msg.payload)
-            klass_type = MQTTTopicPayload[msg.topic]
-            self.topic_map[msg.topic](klass_type(**payload))
+
+            # load the json into a pydantic model
+            klass = MQTTTopicPayload[msg.topic](**payload)
+
+            # execute callback
+            self.topic_map[msg.topic](klass)
 
     def on_connect(self, client: mqtt.Client, userdata: Any, flags: dict, rc: int) -> None:
         """
@@ -93,18 +97,29 @@ class MQTTModule:
             logger.success(f"Subscribed to: {topic}")
 
 {%- for topic, klass in topic_class.items() %}
-
     @overload
-    def send_message(self, topic: Literal["{{ topic }}"], payload: {{ klass }}, force_write: bool) -> None: ...
+    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None{%- endif -%}], force_write: bool) -> None: ...
 {%- endfor %}
 
-    def send_message(self, topic: str, payload: pydantic.BaseModel, force_write: bool = False) -> None:
+    def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
         """
         Sends a message to the MQTT broker. Enabling `force_write` will
         forcefully send the message, bypassing threading mutex. Only use this
         if you know what you're doing.
         """
         # logger.debug(f"Sending message to {topic}: {payload}")
+
+        # if no payload given, use empty dict
+        if payload is None:
+            payload = {}
+
+        # if a dict is provided, convert to a pydantic class
+        if isinstance(payload, dict):
+            payload = MQTTTopicPayload[topic](**payload)
+
+            # type-hinting
+            assert not isinstance(payload, dict) and payload is not None
+
         self._mqtt_client.publish(topic, payload.json())
 
         # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
