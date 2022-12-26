@@ -118,7 +118,7 @@ def type_hint_for_property(
     elif property_["type"] == "boolean":
         type_hint = "bool"
     elif property_["type"] == "object":
-        subclass_name = parent_name + name.title()
+        subclass_name = (parent_name + name.title()).replace("_", "")
         type_hint, output_lines = subclass_name, build_class_code(
             subclass_name, property_
         )
