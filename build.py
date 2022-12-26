@@ -10,9 +10,9 @@ import jsonref
 import yaml
 
 try:
-    import tomlib as tomli  # type: ignore
+    import tomllib  # type: ignore
 except ImportError:
-    import tomli
+    import tomli as tomllib  # type: ignore
 
 THIS_DIR = pathlib.Path(__file__).parent
 MQTT_DIR = THIS_DIR.joinpath("bell", "avr", "mqtt")
@@ -142,13 +142,13 @@ def type_hint_for_property(
 
 def build_class_code(class_name: str, class_data: dict) -> List[str]:
     assert class_data["type"] == "object"
-    assert class_data["additionalProperties"] == False
+    assert class_data["additionalProperties"] is False
 
     output_lines = [
         f"class {class_name}(BaseModel):",
-        f"\tclass Config:",
-        f"\t\textra = Extra.forbid",
-        f"",
+        "\tclass Config:",
+        "\t\textra = Extra.forbid",
+        "",
     ]
 
     if "properties" in class_data:
@@ -174,7 +174,7 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
                 output_lines.extend(['\t"""', "\t" + property_["description"], '\t"""'])
 
     # add a blank line at the end
-    output_lines.append(f"")
+    output_lines.append("")
     return output_lines
 
 
@@ -233,7 +233,7 @@ def python_code() -> None:
             (
                 f"class _{klass}Callable(Protocol):",
                 '\t"""',
-                f"\tClass used only for type-hinting MQTT callbacks.",
+                "\tClass used only for type-hinting MQTT callbacks.",
                 '\t"""',
                 f"\tdef __call__(self, payload: {klass}) -> Any:",
                 "\t\t...",
@@ -267,7 +267,7 @@ def docs() -> None:
     apispec = MQTT_DIR.joinpath("asyncapi.yml")
 
     with open(THIS_DIR.joinpath("pyproject.toml"), "rb") as fp:
-        pyproject = tomli.load(fp)
+        pyproject = tomllib.load(fp)
 
     # required for Windows because `npx` is a cmd script
     npx = shutil.which("npx")

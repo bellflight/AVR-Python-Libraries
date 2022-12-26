@@ -1,6 +1,6 @@
 [tool.poetry]
     name = "bell-avr-libraries"
-    version = "0.1.12"
+    version = "0.2.0"
     description = "Common Python libraries used by parts of Bell AVR"
     license = "MIT"
     readme = "README.md"
@@ -33,17 +33,18 @@
     # testing
     pytest       = "^7.2.0"
     pytest-xdist = "^3.0.2"
-    # formatting
-    black     = "^22.10.0"
-    isort     = "^5.10.1"
-    autoflake = "^1.7.7"
-    # linting
-    pyleft = "^1.1.0"
+    pytest-cov   = "^4.0.0"
+    pre-commit   = "^2.21.0"
     # building template
     Jinja2  = "^3.1.2"
     jsonref = "^1.0.1"
     pyyaml  = "^6.0"
     tomli   = { version = "^2.0.1", python = "<3.11" }
+
+[tool.pyright]
+    typeCheckingMode = "basic"
+    venvPath         = "."
+    venv             = ".venv"
 
 [tool.coverage.run]
     omit = ["*.venv*"]
@@ -51,15 +52,18 @@
 [tool.coverage.html]
     show_contexts = true
 
-[tool.pyright]
-    typeCheckingMode = "basic"
-
-    # [tool.pytest.ini_options]
-    #     addopts = "-n auto"
-
 [tool.isort]
-    profile        = "black"
-    skip_gitignore = true
+    profile = "black"
+
+[tool.autoflake]
+    recursive = true
+
+[tool.flake8]
+    exclude = ".venv"
+    # E501 is line too long
+    # E203 is whitespace before ':'
+    # W503 is line break before binary operator
+    ignore = "E501, E203, W503"
 
 [build-system]
     requires      = ["poetry-core>=1.0.0"]

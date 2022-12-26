@@ -1,150 +1,87 @@
 name: Tests
 
 on:
-    pull_request:
-        branches:
-            - main
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        if: "!contains(github.event.head_commit.message, 'ci skip')"
+  checks:
+    uses: bellflight/github-actions/.github/workflows/avr_python_checks.yml@main
 
-        strategy:
-            matrix:
-                python_version: ["3.11", "3.10", "3.9", "3.8"]
+  test:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+    strategy:
+      matrix:
+        python_version: ["3.11", "3.10", "3.9", "3.8"]
 
-            - name: Setup Poetry
-              uses: Gr1N/setup-poetry@v7
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-            - name: Setup Python ${{ matrix.python_version }}
-              uses: actions/setup-python@v4
-              with:
-                  python-version: ${{ matrix.python_version }}
-                  cache: poetry
+      - name: Install poetry
+        run: |
+          python -m pip install pip wheel pipx --upgrade
+          pipx install poetry
 
-            - name: Install Python Dependencies
-              run: poetry install --all-extras
+      - name: Setup Python ${{ matrix.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+          cache: poetry
 
-            - name: Generate Code
-              run: poetry run python build.py
+      - name: Install Python Dependencies
+        run: poetry install --all-extras
 
-            - name: Run Tests
-              run: poetry run pytest -v
+      - name: Generate Code
+        run: poetry run python build.py
 
-    formatting:
-        runs-on: ubuntu-latest
-        if: "!contains(github.event.head_commit.message, 'ci skip')"
+      - name: Run Tests
+        run: poetry run pytest -v
 
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
+  docs:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
-            - name: Setup Poetry
-              uses: Gr1N/setup-poetry@v7
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-            - name: Setup Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version-file: .python-version
-                  cache: poetry
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: .node-version
+          cache: npm
 
-            - name: Install Python Dependencies
-              run: poetry install --all-extras
+      - name: Install poetry
+        run: |
+          python -m pip install pip wheel pipx --upgrade
+          pipx install poetry
 
-            - name: Generate Code
-              run: poetry run python build.py
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version-file: .python-version
+          cache: poetry
 
-            - name: Run Black
-              run: poetry run python -m black . --check
+      - name: Install Python Dependencies
+        run: poetry install
 
-            - name: Run Isort
-              run: poetry run python -m isort . --check
+      - name: Build Docs
+        run: poetry run python build.py --docs
 
-            - name: Run Autoflake
-              run: poetry run python -m autoflake . --recursive --remove-all-unused-imports --check
+  validate-apispec:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
 
-    type-checking:
-        runs-on: ubuntu-latest
-        if: "!contains(github.event.head_commit.message, 'ci skip')"
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
-
-            - name: Setup Node
-              uses: actions/setup-node@v3
-              with:
-                  node-version-file: .node-version
-                  cache: npm
-
-            - name: Setup Poetry
-              uses: Gr1N/setup-poetry@v7
-
-            # run on the lowest supported version
-            - name: Setup Python 3.8
-              uses: actions/setup-python@v4
-              with:
-                  python-version: "3.8"
-                  cache: poetry
-
-            - name: Install Python Dependencies
-              run: poetry install --all-extras
-
-            - name: Generate Code
-              run: poetry run python build.py
-
-            - name: Install Node Dependencies
-              run: npm install
-
-            - name: Run Pyright
-              run: poetry run npx pyright .
-
-            - name: Run Pyleft
-              run: poetry run python -m pyleft .
-
-    docs:
-        runs-on: ubuntu-latest
-        if: "!contains(github.event.head_commit.message, 'ci skip')"
-
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
-
-            - name: Setup Node
-              uses: actions/setup-node@v3
-              with:
-                  node-version-file: .node-version
-                  cache: npm
-
-            - name: Setup Poetry
-              uses: Gr1N/setup-poetry@v7
-
-            - name: Setup Python
-              uses: actions/setup-python@v4
-              with:
-                  python-version-file: .python-version
-                  cache: poetry
-
-            - name: Install Python Dependencies
-              run: poetry install
-
-            - name: Build Docs
-              run: poetry run python build.py --docs
-
-    validate-apispec:
-        runs-on: ubuntu-latest
-        if: "!contains(github.event.head_commit.message, 'ci skip')"
-
-        steps:
-            - name: Checkout Code
-              uses: actions/checkout@v3
-
-            - name: Validate AsyncAPI Spec
-              uses: WaleedAshraf/asyncapi-github-action@v0
-              with:
-                  filepath: bell/avr/mqtt/asyncapi.yml
+      - name: Validate AsyncAPI Spec
+        uses: WaleedAshraf/asyncapi-github-action@v0
+        with:
+          filepath: bell/avr/mqtt/asyncapi.yml

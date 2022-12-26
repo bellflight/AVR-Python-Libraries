@@ -1,5 +1,7 @@
 # AVR-Python-Libraries
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+
 ## Install
 
 To install the base package, run:
@@ -208,9 +210,36 @@ serial_ports = ports.list_serial_ports()
 
 ## Development
 
-Install [`poetry`](https://python-poetry.org/) and run
-`poetry install --all-extras` to install of the dependencies
-inside a virtual environment.
+It's assumed you have a version of Python installed from
+[python.org](https://python.org) that is the same or newer as
+defined in the [`.python-version`](.python-version) file.
+
+First, install [Poetry](https://python-poetry.org/):
+
+```bash
+python -m pip install pipx --upgrade
+pipx ensurepath
+pipx install poetry
+# (Optionally) Add pre-commit plugin
+poetry self add poetry-pre-commit-plugin
+```
+
+Now, you can clone the repo and install dependencies:
+
+```bash
+git clone https://github.com/bellflight/AVR-Python-Libraries
+cd AVR-Python-Libraries
+poetry install --sync --all-extras
+poetry run pre-commit install --install-hooks
+```
+
+Run
+
+```bash
+poetry shell
+```
+
+to activate the virtual environment.
 
 Build the auto-generated code with `poetry run python build.py`. From here,
 you can now produce a package with `poetry build`.
