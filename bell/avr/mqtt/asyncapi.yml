@@ -768,7 +768,7 @@ components:
                     - climb_rate
                 properties:
                     climb_rate:
-                        description: Rate of climb in feet per second.
+                        description: Rate of climb in feet per minute.
                         type: number
 
         AVRFusionAttitudeQuaternion:
