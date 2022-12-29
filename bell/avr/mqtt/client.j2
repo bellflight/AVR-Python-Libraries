@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import copy
 import json
+import uuid
 from typing import Any, Literal, Union, overload
 
 import paho.mqtt.client as mqtt
@@ -33,7 +34,10 @@ class MQTTModule:
         self.mqtt_port = 18830
 
         # create the MQTT client
-        self._mqtt_client = mqtt.Client(protocol=mqtt.MQTTv311)
+        # Currently using MQTT v3.1.1
+        # No reason we can't use v5, just type hinting needs to change
+        # for some `on_` functions.
+        self._mqtt_client = mqtt.Client(client_id=f"{self.__class__.__name__}_{uuid.UUID4().to_hex()}", protocol=mqtt.MQTTv311)
 
         # set up the on connect and on message handlers
         self._mqtt_client.on_connect = self.on_connect
@@ -113,14 +117,21 @@ class MQTTModule:
         if payload is None:
             payload = {}
 
+        str_payload = ""
+
         # if a dict is provided, convert to a pydantic class
         if isinstance(payload, dict):
-            payload = MQTTTopicPayload[topic](**payload)
+            if topic not in MQTTTopicPayload:
+                # if topic is not known, pass it on as JSON
+                str_payload = json.dumps(payload)
+            else:
+                payload = MQTTTopicPayload[topic](**payload)
 
-            # type-hinting
-            assert not isinstance(payload, dict) and payload is not None
+        # if we have a pydantic class by now, convert to JSON
+        if isinstance(payload, pydantic.BaseModel):
+            str_payload = payload.json()
 
-        self._mqtt_client.publish(topic, payload.json())
+        self._mqtt_client.publish(topic, str_payload)
 
         # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
         # pre-emptively write network data while still in a callback, bypassing
@@ -131,4 +142,3 @@ class MQTTModule:
             self._mqtt_client.loop_write()
 
         self.message_cache[topic] = copy.deepcopy(payload)
-
