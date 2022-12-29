@@ -151,7 +151,7 @@ from bell.avr import serial
 ```
 
 These are serial utilities that help facilitate finding and communicating
-with the AVR peripherial control computer.
+with the AVR peripheral control computer.
 
 #### Client
 
@@ -174,7 +174,7 @@ from bell.avr.serial import client
 ```
 
 The `PeripheralControlComputer` class sends serial messages
-to the AVR peripherial control computer, via easy-to-use class methods.
+to the AVR peripheral control computer, via easy-to-use class methods.
 
 ```python
 import bell.avr.serial.client
