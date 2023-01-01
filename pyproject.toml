@@ -37,7 +37,7 @@
     isort     = "^5.10.1"
     autoflake = "^2.0.0"
     # linting
-    pyleft = "^1.1.0"
+    pyleft = "^1.1.4"
     # building template
     Jinja2      = "^3.1.2"
     commentjson = "^0.9.0"
