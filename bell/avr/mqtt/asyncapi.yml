@@ -272,7 +272,7 @@ channels:
 components:
     schemas:
         wrgb:
-            description: "Color values for the red, green, blue, and alpha channels, respectively."
+            description: "Color values for the white, red, green, and blue channels, respectively."
             type: array
             minItems: 4
             maxItems: 4
