@@ -12,7 +12,7 @@
                     "key": "wrgb",
                     "type": "Tuple[int, int, int, int]",
                     "docs": [
-                        "A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. This is in order of Red, Green, Blue, and Alpha. Example: [255, 0, 128, 255]."
+                        "A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. This is in order of White, Red, Green, Blue. Example: [0, 0, 255, 0] would be Green."
                     ]
                 }
             ]
@@ -27,7 +27,7 @@
                     "key": "wrgb",
                     "type": "Tuple[int, int, int, int]",
                     "docs": [
-                        "A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. This is in order of Red, Green, Blue, and Alpha. Example: [255, 0, 128, 255]."
+                        "A list of 4 `int`s between 0 and 255 to set the base color of the LEDs. This is in order of White, Red, Green, Blue. Example: [0, 0, 255, 0] would be Green."
                     ]
                 },
                 {
