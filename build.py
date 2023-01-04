@@ -1,6 +1,8 @@
 import argparse
+import json
 import os
 import pathlib
+import shlex
 import shutil
 import subprocess
 from typing import Dict, List, Tuple
@@ -273,22 +275,27 @@ def docs() -> None:
     npx = shutil.which("npx")
     assert npx is not None
 
+    cmd = [
+        npx,
+        "ag",  # asyncapi generator
+        str(apispec.absolute()),  # asyncapi spec
+        "@asyncapi/html-template",  # html template
+        "--output",
+        str(docs_dir.absolute()),  # output directory
+        "--force-write",  # force overwrite
+        "--param",
+        f'version={pyproject["tool"]["poetry"]["version"]}',  # version
+        "--param",
+        "favicon=https://raw.githubusercontent.com/bellflight/AVR-Docs/main/static/favicons/android-chrome-512x512.png",
+        "--param",
+        f"config={json.dumps({'expand': {'messageExamples': True}})}",
+    ]
+
     print("Building docs")
+    print(shlex.join(cmd))
+
     subprocess.check_call(
-        [
-            npx,
-            "ag",  # asyncapi generator
-            str(apispec.absolute()),  # asyncapi spec
-            "@asyncapi/html-template",  # html template
-            "--install",  # automatically install template and dependencies
-            "--output",
-            str(docs_dir.absolute()),  # output directory
-            "--force-write",  # force overwrite
-            "--param",
-            "sidebarOrganization=hierarchical",  # sidebar organization
-            "--param",
-            f'version={pyproject["tool"]["poetry"]["version"]}',  # version
-        ],
+        cmd,
         env={**os.environ, "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true"},
     )
 

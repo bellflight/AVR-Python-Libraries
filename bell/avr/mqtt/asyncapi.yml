@@ -1,7 +1,30 @@
 asyncapi: 2.5.0
 info:
-    title: "Bell AVR MQTT Message Spec"
+    title: "Bell AVR MQTT Message Specification"
     version: "XYZ" # don't touch, this will be automatically updated based on pyproject.toml
+    description: |
+        This is the complete MQTT message specification for Bell AVR.
+
+        While the below examples are raw JSON data, we highly recommend using the
+        `MQTTModule`'s `send_message` method, and the Python classes associated with
+        each topic. Here are two equivalent examples:
+
+        1. Preferred method using Python classes:
+        ```python
+        from bell.avr.mqtt.payloads import AVRPCMServoAbsolute
+        self.send_message("avr/pcm/servo/absolute", AVRPCMServoAbsolute(servo=2, position=100))
+        ```
+
+        2. Alternative method using Python dicts:
+        ```python
+        self.send_message("avr/pcm/servo/absolute", {"servo": 2, "position": 100})
+        ```
+
+        For each of the topics and operations and below, "PUB" is meant for topics
+        for you to publish to, and "SUB" is meant for topics for you to subscribe to.
+        While there is nothing enforcing this, publishing data to subscribe topics
+        is liable to cause your drone to crash, as the data on many of these topics
+        is used for flight controller calculations.
 channels:
     avr/pcm/color/set:
         publish:
