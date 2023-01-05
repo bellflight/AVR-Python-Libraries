@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+import contextlib
 import copy
 import json
+import os
 import uuid
 from typing import Any, Literal, Union, overload
 
@@ -29,15 +31,20 @@ class MQTTModule:
     """
 
     def __init__(self):
-        # these should be not be changed
-        self.mqtt_host = "mqtt"
+        self.mqtt_host = os.getenv("MQTT_HOST", "mqtt")
         self.mqtt_port = 18830
+
+        _mqtt_port = os.getenv("MQTT_PORT")
+        # try to convert string to int
+        if isinstance(_mqtt_port, str):
+            with contextlib.suppress(ValueError):
+                self.mqtt_port = int(_mqtt_port)
 
         # create the MQTT client
         # Currently using MQTT v3.1.1
         # No reason we can't use v5, just type hinting needs to change
         # for some `on_` functions.
-        self._mqtt_client = mqtt.Client(client_id=f"{self.__class__.__name__}_{uuid.UUID4().to_hex()}", protocol=mqtt.MQTTv311)
+        self._mqtt_client = mqtt.Client(client_id=f"{self.__class__.__name__}_{uuid.uuid4()}", protocol=mqtt.MQTTv311)
 
         # set up the on connect and on message handlers
         self._mqtt_client.on_connect = self.on_connect
