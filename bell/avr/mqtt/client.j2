@@ -21,6 +21,7 @@ from .payloads import (
 {%- endfor %}
 )
 from ..utils.decorators import try_except
+from ..utils.env import get_int
 
 
 class MQTTModule:
@@ -32,13 +33,7 @@ class MQTTModule:
 
     def __init__(self):
         self.mqtt_host = os.getenv("MQTT_HOST", "mqtt")
-        self.mqtt_port = 18830
-
-        _mqtt_port = os.getenv("MQTT_PORT")
-        # try to convert string to int
-        if isinstance(_mqtt_port, str):
-            with contextlib.suppress(ValueError):
-                self.mqtt_port = int(_mqtt_port)
+        self.mqtt_port = get_int("MQTT_PORT", 18830)
 
         # create the MQTT client
         # Currently using MQTT v3.1.1

@@ -40,7 +40,7 @@ from bell.avr.mqtt.payloads import AVRPCMColorSet
 payload = AVRPCMColorSet((128, 232, 142, 0))
 ```
 
-The second part of the MQTT libraries, is the `MQTTModule` class.
+The second part of the MQTT libraries is the `MQTTModule` class.
 This is a boilerplate module for AVR that makes it very easy to send
 and receive MQTT messages and do something with them.
 
@@ -129,8 +129,8 @@ with a given `period` or `frequency`.
 from bell.avr.utils import timing
 ```
 
-Here is a `rate_limit` function which take a callable and a
-period or frequency, and only run the callable at that given rate.
+Here is a `rate_limit` function which takes a callable and a
+period or frequency, and only runs the callable at that given rate.
 
 ```python
 for _ in range(10):
@@ -139,10 +139,26 @@ for _ in range(10):
     time.sleep(1)
 ```
 
-This works tracking calls to the `rate_limit` function from a line number
+This works by tracking calls to the `rate_limit` function from a line number
 within a file, so multiple calls to `rate_limit` say within a loop
-with the same callable and period will be treated seperately. This allows
+with the same callable and period will be treated separately. This allows
 for dynamic frequency manipulation.
+
+#### Env
+
+```python
+from bell.avr.utils import env
+```
+
+The function `get_int` is like the `os.getenv` function, except it is only meant
+for environment variables which contain an integer.
+
+```python
+env.get_int("MQTT_HOST", 1883)
+# returns the value of MQTT_HOST as an integer
+# or 1883 if the environment variable is not set
+# or not an integer.
+```
 
 ### Serial
 
