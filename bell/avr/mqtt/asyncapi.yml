@@ -86,11 +86,16 @@ channels:
             message:
                 $ref: "#/components/messages/AVRFCMHILGPSStats"
             description: "Reports statistics on the HIL GPS data that is fed into the flight controller."
-    avr/fcm/event:
+    avr/fcm/airborne:
         subscribe:
             message:
-                $ref: "#/components/messages/AVRFCMEvent"
-            description: "Reports events from the flight controller such as flight mode changes."
+                $ref: "#/components/messages/AVRFCMAirborne"
+            description: "Reports whether the drone is airborne or not."
+    avr/fcm/landed:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRFCMLanded"
+            description: "Reports whether the drone has landed or not."
     avr/fcm/battery:
         subscribe:
             message:
@@ -519,20 +524,34 @@ components:
                         description: "The number of messages that have been sent to the flight controller since the software has started."
                         type: integer
 
-        AVRFCMEvent:
+        AVRFCMAirborne:
             payload:
                 type: object
                 additionalProperties: false
                 required:
-                    - name
-                    - payload
+                    - airborne
                 properties:
-                    name:
-                        description: "The name of the event."
+                    airborne:
+                        description: "Whether the drone is currently airborne or not."
+                        type: boolean
+
+
+        AVRFCMLanded:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - landed
+                properties:
+                    landed:
+                        description: "Landed state of the drone."
                         type: string
-                    payload:
-                        description: "The payload of the event."
-                        type: string
+                        enum:
+                            - UNKNOWN
+                            - ON_GROUND
+                            - IN_AIR
+                            - TAKING_OFF
+                            - LANDING
 
         AVRFCMBattery:
             payload:

@@ -104,7 +104,7 @@ class MQTTModule:
 
 {%- for topic, klass in topic_class.items() %}
     @overload
-    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None{%- endif -%}], force_write: bool) -> None: ...
+    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None{%- endif -%}], force_write: bool = False) -> None: ...
 {%- endfor %}
 
     def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
