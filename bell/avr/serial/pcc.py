@@ -1,7 +1,7 @@
 import ctypes
 import time
 from struct import pack
-from typing import Any, List, Literal, Optional, Union
+from typing import Any, List, Literal, Optional, Union, Tuple
 
 import serial
 from loguru import logger
@@ -33,36 +33,40 @@ class PeripheralControlComputer:
 
         self.shutdown: bool = False
 
-    def set_base_color(self, wrgb: List[int]) -> None:
+    def set_base_color(self, wrgb: Tuple[int, int, int, int]) -> None:
         command = self.commands["SET_BASE_COLOR"]
+        wrgb_l = list(wrgb)
 
         # wrgb + code = 5
-        if len(wrgb) != 4:
-            wrgb = [0, 0, 0, 0]
+        if len(wrgb_l) != 4:
+            wrgb_l = [0, 0, 0, 0]
 
-        for i, color in enumerate(wrgb):
+        for i, color in enumerate(wrgb_l):
             if not isinstance(color, int) or color > 255 or color < 0:
-                wrgb[i] = 0
+                wrgb_l[i] = 0
 
-        data = self._construct_payload(command, 1 + len(wrgb), wrgb)
+        data = self._construct_payload(command, 1 + len(wrgb_l), wrgb_l)
 
         logger.debug(f"Setting base color: {data}")
         self.ser.write(data)
 
-    def set_temp_color(self, wrgb: List[int], time: float = 0.5) -> None:
+    def set_temp_color(
+        self, wrgb: Tuple[int, int, int, int], time: float = 0.5
+    ) -> None:
         command = self.commands["SET_TEMP_COLOR"]
+        wrgb_l = list(wrgb)
 
         # wrgb + code = 5
-        if len(wrgb) != 4:
-            wrgb = [0, 0, 0, 0]
+        if len(wrgb_l) != 4:
+            wrgb_l = [0, 0, 0, 0]
 
-        for i, color in enumerate(wrgb):
+        for i, color in enumerate(wrgb_l):
             if not isinstance(color, int) or color > 255 or color < 0:
-                wrgb[i] = 0
+                wrgb_l[i] = 0
 
         time_bytes = self.list_pack("<f", time)
         data = self._construct_payload(
-            command, 1 + len(wrgb) + len(time_bytes), wrgb + time_bytes
+            command, 1 + len(wrgb) + len(wrgb_l), wrgb_l + time_bytes
         )
 
         logger.debug(f"Setting temp color: {data}")
