@@ -41,7 +41,13 @@ def type_hint_for_number_property(property_: Dict, nested: bool = False) -> str:
         return python_type
 
     # otherwise, add a Field object, with a possible default
-    output = f"{python_type} = Field({property_.get('default', '...')}"
+    # https://docs.pydantic.dev/visual_studio_code/#adding-a-default-with-field
+    field_value = "..."
+    default = property_.get("default", None)
+    if default is not None:
+        field_value = f"default={default}"
+
+    output = f"{python_type} = Field({field_value}"
 
     # possible min value
     if "minimum" in property_:
@@ -131,7 +137,8 @@ def type_hint_for_property(
     else:
         raise ValueError(f'Cannot handle type: {property_["type"]}')
 
-    if not required:
+    if not required and "Field(..." in type_hint:
+        # if something has a default, don't actually use Optional[]
         if "=" in type_hint:
             # in case the type hint has something it's equal to like a field
             chunks = type_hint.split(" =", maxsplit=1)
