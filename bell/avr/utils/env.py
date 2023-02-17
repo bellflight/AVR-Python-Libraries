@@ -4,16 +4,16 @@ from typing import Optional, overload
 
 
 @overload
-def get_int(key: str, default: None = None) -> Optional[int]:
+def get_env_int(key: str, default: None = None) -> Optional[int]:
     ...
 
 
 @overload
-def get_int(key: str, default: int) -> int:
+def get_env_int(key: str, default: int) -> int:
     ...
 
 
-def get_int(key: str, default: Optional[int] = None) -> Optional[int]:
+def get_env_int(key: str, default: Optional[int] = None) -> Optional[int]:
     """
     Get an environment variable that is an integer. If the value is not an integer,
     will return the default value, or if no default value is set, will return None.

@@ -238,13 +238,17 @@ def python_code() -> None:
 
     # generate callables
     for klass in set(topic_class.values()):
+        args = f", payload: {klass}"
+        if "EmptyMessage" in klass:
+            args = ""
+
         final_output_lines.extend(
             (
                 f"class _{klass}Callable(Protocol):",
                 '\t"""',
                 "\tClass used only for type-hinting MQTT callbacks.",
                 '\t"""',
-                f"\tdef __call__(self, payload: {klass}) -> Any:",
+                f"\tdef __call__(self{args}) -> Any:",
                 "\t\t...",
                 "",
             )

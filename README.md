@@ -150,11 +150,11 @@ for dynamic frequency manipulation.
 from bell.avr.utils import env
 ```
 
-The function `get_int` is like the `os.getenv` function, except it is only meant
+The function `get_env_int` is like the `os.getenv` function, except it is only meant
 for environment variables which contain an integer.
 
 ```python
-env.get_int("MQTT_HOST", 1883)
+env.get_env_int("MQTT_HOST", 1883)
 # returns the value of MQTT_HOST as an integer
 # or 1883 if the environment variable is not set
 # or not an integer.
