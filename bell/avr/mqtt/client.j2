@@ -19,7 +19,6 @@ from bell.avr.mqtt.payloads import (
     {{ klass }},
 {%- endfor %}
 )
-from bell.avr.utils.decorators import try_except
 from bell.avr.utils.env import get_env_int
 
 
@@ -48,6 +47,9 @@ class MQTTModule:
         # this is intended to be overwritten by the child class
         self.topic_map: _MQTTTopicCallableTypedDict = {}
 
+        # flag to subscribe to all topics on connect
+        self.subscribe_to_all_topics: bool = False
+
         # maintain a cache of the last message sent on a topic by this module
         self.message_cache: _MQTTTopicPayloadTypedDict = {}
 
@@ -75,7 +77,6 @@ class MQTTModule:
         # run in background
         self._mqtt_client.loop_start()
 
-    @try_except()
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
         """
         On message callback, dispatches the message to the appropriate function.
@@ -101,7 +102,10 @@ class MQTTModule:
             client.subscribe(topic)
             logger.success(f"Subscribed to: {topic}")
 
-{%- for topic, klass in topic_class.items() %}
+        if self.subscribe_to_all_topics:
+            client.subscribe("avr/#")
+            logger.success("Subscribed to: avr/#")
+{% for topic, klass in topic_class.items() %}
     @overload
     def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None{%- endif -%}], force_write: bool = False) -> None: ...
 {%- endfor %}
