@@ -3,7 +3,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import copy
 import json
 import os
@@ -14,14 +13,14 @@ import paho.mqtt.client as mqtt
 from loguru import logger
 import pydantic
 
-from .constants import _MQTTTopicCallableTypedDict, _MQTTTopicPayloadTypedDict, MQTTTopicPayload
-from .payloads import (
-{%- for topic, klass in topic_class.items() %}
+from bell.avr.mqtt.constants import _MQTTTopicCallableTypedDict, _MQTTTopicPayloadTypedDict, MQTTTopicPayload
+from bell.avr.mqtt.payloads import (
+{%- for klass in topic_class.values()|unique %}
     {{ klass }},
 {%- endfor %}
 )
-from ..utils.decorators import try_except
-from ..utils.env import get_int
+from bell.avr.utils.decorators import try_except
+from bell.avr.utils.env import get_env_int
 
 
 class MQTTModule:
@@ -33,7 +32,7 @@ class MQTTModule:
 
     def __init__(self):
         self.mqtt_host = os.getenv("MQTT_HOST", "mqtt")
-        self.mqtt_port = get_int("MQTT_PORT", 18830)
+        self.mqtt_port = get_env_int("MQTT_PORT", 18830)
 
         # create the MQTT client
         # Currently using MQTT v3.1.1

@@ -137,7 +137,7 @@ def type_hint_for_property(
     else:
         raise ValueError(f'Cannot handle type: {property_["type"]}')
 
-    if not required and "Field(..." in type_hint:
+    if not required and "Field(default=" not in type_hint:
         # if something has a default, don't actually use Optional[]
         if "=" in type_hint:
             # in case the type hint has something it's equal to like a field
@@ -223,7 +223,7 @@ def python_code() -> None:
         "",
         "from __future__ import annotations",
         "",
-        "from typing import Any, List, Optional, Literal, Tuple, Protocol",
+        "from typing import Any, List, Optional, Literal, TYPE_CHECKING, Tuple, Protocol",
         "from pydantic import BaseModel, Extra, Field",
         "",
         "",
