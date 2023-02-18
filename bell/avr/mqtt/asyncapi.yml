@@ -211,7 +211,7 @@ channels:
             message:
                 $ref: "#/components/messages/AVRVIOAttitudeEulerRadians"
             description: "Reports the measured attitude of the drone from the tracking camera in Euler radians."
-    avr/vio/attitude/euler/quaternion:
+    avr/vio/attitude/quaternion:
         subscribe:
             message:
                 $ref: "#/components/messages/AVRVIOAttitudeQuaternion"
