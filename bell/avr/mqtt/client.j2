@@ -77,19 +77,44 @@ class MQTTModule:
         # run in background
         self._mqtt_client.loop_start()
 
+    def stop(self) -> None:
+        """
+        Stops the MQTT loop and disconnects from the broker. Can only be used with
+        `run_non_blocking`.
+        """
+        self._mqtt_client.loop_stop()
+
     def on_message(self, client: mqtt.Client, userdata: Any, msg: mqtt.MQTTMessage) -> None:
         """
         On message callback, dispatches the message to the appropriate function.
         """
         # logger.debug(f"Recieved {msg.topic}: {msg.payload}")
-        if msg.topic in self.topic_map:
-            # we talk JSON, no exceptions
-            payload = json.loads(msg.payload)
+        if msg.topic not in self.topic_map:
+            return
 
-            # load the json into a pydantic model
+        # so json.loads doesn't choke on an empty string
+        if not msg.payload:
+            msg.payload = b"{}"
+
+        # we talk JSON, no exceptions
+        payload = json.loads(msg.payload)
+
+        # load the json into a pydantic model
+        if msg.topic in MQTTTopicPayload:
             klass = MQTTTopicPayload[msg.topic](**payload)
 
-            # execute callback
+        # if we have an empty dict, manually convert it
+        elif payload == {}:
+            klass = AVREmptyMessage()
+
+        # whatever the user gave us
+        else:
+            klass = payload
+
+        # execute callback
+        if isinstance(klass, AVREmptyMessage):
+            self.topic_map[msg.topic]()
+        else:
             self.topic_map[msg.topic](klass)
 
     def on_connect(self, client: mqtt.Client, userdata: Any, flags: dict, rc: int) -> None:
@@ -107,7 +132,7 @@ class MQTTModule:
             logger.success("Subscribed to: avr/#")
 {% for topic, klass in topic_class.items() %}
     @overload
-    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None{%- endif -%}], force_write: bool = False) -> None: ...
+    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None] = None{%- else -%}]{%- endif -%}, force_write: bool = False) -> None: ...
 {%- endfor %}
 
     def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
@@ -118,23 +143,22 @@ class MQTTModule:
         """
         # logger.debug(f"Sending message to {topic}: {payload}")
 
-        # if no payload given, use empty dict
+        # if no payload given, use empty message
         if payload is None:
-            payload = {}
+            payload = AVREmptyMessage()
 
-        str_payload = ""
+        # if payload is for a known topic, convert to pydantic model
+        if topic in MQTTTopicPayload and not isinstance(
+            payload, pydantic.BaseModel
+        ):
+            payload = MQTTTopicPayload[topic](**payload)
 
-        # if a dict is provided, convert to a pydantic class
-        if isinstance(payload, dict):
-            if topic not in MQTTTopicPayload:
-                # if topic is not known, pass it on as JSON
-                str_payload = json.dumps(payload)
-            else:
-                payload = MQTTTopicPayload[topic](**payload)
-
-        # if we have a pydantic class by now, convert to JSON
+        # convert pydantic models to json
         if isinstance(payload, pydantic.BaseModel):
             str_payload = payload.json()
+        # convert any other data type to json
+        else:
+            str_payload = json.dumps(payload)
 
         self._mqtt_client.publish(topic, str_payload)
 

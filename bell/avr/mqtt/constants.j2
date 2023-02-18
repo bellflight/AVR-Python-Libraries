@@ -4,7 +4,7 @@
 from typing import Type, TypedDict
 
 from .payloads import (
-{%- for topic, klass in topic_class.items() %}
+{%- for klass in topic_class.values()|unique %}
     {{ klass }},
     _{{ klass }}Callable,
 {%- endfor %}
@@ -13,14 +13,14 @@ from .payloads import (
 
 # List of MQTT topics
 MQTTTopics = [
-{%- for topic, klass in topic_class.items() %}
+{%- for topic in topic_class.keys() %}
     "{{ topic }}",
 {%- endfor %}
 ]
 
 # List of MQTT payload types
 MQTTPayloads = [
-{%- for topic, klass in topic_class.items() %}
+{%- for klass in topic_class.values()|unique %}
     {{ klass }},
 {%- endfor %}
 ]
