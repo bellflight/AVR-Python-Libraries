@@ -338,8 +338,9 @@ components:
         hdg:
             description: "Heading in degrees."
             type: number
-            minimum: 0
-            maximum: 360
+            # sometimes heading values are outside this range and need to be wrapped
+            # minimum: 0
+            # maximum: 360
         n_meters:
             description: "X position in a North/East/Down coordinate system in meters."
             type: number

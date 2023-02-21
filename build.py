@@ -1,11 +1,12 @@
 import argparse
+import dataclasses
 import json
 import os
 import pathlib
 import shlex
 import shutil
 import subprocess
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import jinja2
 import jsonref
@@ -20,7 +21,22 @@ THIS_DIR = pathlib.Path(__file__).parent
 MQTT_DIR = THIS_DIR.joinpath("bell", "avr", "mqtt")
 
 
-def type_hint_for_number_property(property_: Dict, nested: bool = False) -> str:
+@dataclasses.dataclass
+class PropertyTypeHint:
+    prepend_lines: List[str]
+    type_checking: bool
+    type_hint: str
+    type_checking_type_hint: str
+    # basic_type_hint: Optional[str] = None
+
+
+def create_name(parent: str, child: str) -> str:
+    return (parent + child.title()).replace("_", "")
+
+
+def type_hint_for_number_property(
+    property_: Dict, name: str, parent_name: str, nested: bool = False
+) -> PropertyTypeHint:
     """
     Take JSON schema data and turn it into a Python type hint for a number property.
     """
@@ -34,11 +50,12 @@ def type_hint_for_number_property(property_: Dict, nested: bool = False) -> str:
 
     # if there are no extras, just return the python type
     if all(p not in property_ for p in ["default", "minimum", "maximum"]):
-        return python_type
-
-    if nested:
-        # if we're nested, return
-        return python_type
+        return PropertyTypeHint(
+            prepend_lines=[],
+            type_checking=False,
+            type_hint=python_type,
+            type_checking_type_hint="",
+        )
 
     # otherwise, add a Field object, with a possible default
     # https://docs.pydantic.dev/visual_studio_code/#adding-a-default-with-field
@@ -59,21 +76,49 @@ def type_hint_for_number_property(property_: Dict, nested: bool = False) -> str:
 
     # round it out and return
     output += ")"
-    return output
+
+    # if we're nested and have constraints, return a child class
+    if nested:
+        subclass_name = f"{create_name(parent_name, name)}Item"
+        return PropertyTypeHint(
+            prepend_lines=[
+                f"class {subclass_name}(BaseModel):",
+                f"\t__root__: {output}",
+                "",
+            ],
+            type_checking=True,
+            type_hint=subclass_name,
+            type_checking_type_hint=python_type,
+        )
+
+    # return computed type hint
+    return PropertyTypeHint(
+        prepend_lines=[],
+        type_checking=False,
+        type_hint=output,
+        type_checking_type_hint="",
+    )
 
 
 def type_hint_for_array_property(
     property_: Dict, name: str, parent_name: str, nested: bool = False
-) -> Tuple[str, List[str]]:
+) -> PropertyTypeHint:
     """
     Take JSON schema data and turn it into a Python type hint for an array property.
     """
-    subtype_hint, output_lines = type_hint_for_property(
-        property_["items"], True, name, parent_name, True
+    sub_property_type_hint = type_hint_for_property(
+        property_["items"],
+        required=True,
+        name=name,
+        parent_name=parent_name,
+        nested=True,
     )
 
     # basic type
-    python_type = f"List[{subtype_hint}]"
+    python_type = f"List[{sub_property_type_hint.type_hint}]"
+    python_type_checking_type = (
+        f"List[{sub_property_type_hint.type_checking_type_hint}]"
+    )
 
     if (
         "minItems" in property_
@@ -81,18 +126,22 @@ def type_hint_for_array_property(
         and property_["minItems"] == property_["maxItems"]
     ):
         # if there are a fixed number of items, use a Tuple
-        python_type = f"Tuple[{', '.join([subtype_hint] * property_['minItems'])}]"
+        python_type = f"Tuple[{', '.join([sub_property_type_hint.type_hint] * property_['minItems'])}]"
+        python_type_checking_type = f"Tuple[{', '.join([sub_property_type_hint.type_checking_type_hint] * property_['minItems'])}]"
 
     if "minItems" not in property_ and "maxItems" not in property_:
         # if just a basic list and nothing else, return
-        return python_type, output_lines
-
-    if nested:
-        # if we're nested, return
-        return python_type, output_lines
+        return PropertyTypeHint(
+            prepend_lines=sub_property_type_hint.prepend_lines,
+            type_checking=False,
+            type_hint=python_type,
+            type_checking_type_hint="",
+        )
 
     # otherwise, add a Field object
     output = f"{python_type} = Field(..."
+    if sub_property_type_hint.type_checking:
+        output = f"conlist({sub_property_type_hint.type_hint}"
 
     # possible min value
     if "minItems" in property_:
@@ -104,49 +153,68 @@ def type_hint_for_array_property(
 
     # round it out and return
     output += ")"
-    return output, output_lines
+
+    return PropertyTypeHint(
+        prepend_lines=sub_property_type_hint.prepend_lines,
+        type_checking=sub_property_type_hint.type_checking,
+        type_hint=output,
+        type_checking_type_hint=python_type_checking_type,
+    )
 
 
 def type_hint_for_property(
     property_: Dict, required: bool, name: str, parent_name: str, nested: bool = False
-) -> Tuple[str, List[str]]:
+) -> PropertyTypeHint:
     """
     Given property data, return the type hint for a property, plus a
     possible list of extra lines that need to be added before the parent class.
     """
-    output_lines = []
+    property_type_hint = PropertyTypeHint(
+        prepend_lines=[], type_checking=False, type_checking_type_hint="", type_hint=""
+    )
 
     if property_["type"] == "string":
         if "enum" in property_:
-            type_hint = 'Literal["' + '", "'.join(property_["enum"]) + '"]'
+            property_type_hint.type_hint = (
+                'Literal["' + '", "'.join(property_["enum"]) + '"]'
+            )
         else:
-            type_hint = "str"
+            property_type_hint.type_hint = "str"
+
     elif property_["type"] in ["number", "integer"]:
-        type_hint = type_hint_for_number_property(property_, nested=nested)
-    elif property_["type"] == "boolean":
-        type_hint = "bool"
-    elif property_["type"] == "object":
         subclass_name = (parent_name + name.title()).replace("_", "")
-        type_hint, output_lines = subclass_name, build_class_code(
-            subclass_name, property_
+        property_type_hint = type_hint_for_number_property(
+            property_, nested=nested, name=name, parent_name=parent_name
         )
+
+    elif property_["type"] == "boolean":
+        property_type_hint.type_hint = "bool"
+
+    elif property_["type"] == "object":
+        subclass_name = create_name(parent_name, name)
+        (
+            property_type_hint.type_hint,
+            property_type_hint.prepend_lines,
+        ) = subclass_name, build_class_code(subclass_name, property_)
+
     elif property_["type"] == "array":
-        type_hint, output_lines = type_hint_for_array_property(
+        property_type_hint = type_hint_for_array_property(
             property_, name, parent_name, nested=nested
         )
+
     else:
         raise ValueError(f'Cannot handle type: {property_["type"]}')
 
-    if not required and "Field(default=" not in type_hint:
+    if not required and "Field(default=" not in property_type_hint.type_hint:
         # if something has a default, don't actually use Optional[]
-        if "=" in type_hint:
+        if "=" in property_type_hint.type_hint:
             # in case the type hint has something it's equal to like a field
-            chunks = type_hint.split(" =", maxsplit=1)
-            type_hint = f"Optional[{chunks[0]}] = {chunks[1]}"
+            chunks = property_type_hint.type_hint.split(" =", maxsplit=1)
+            property_type_hint.type_hint = f"Optional[{chunks[0]}] = {chunks[1]}"
         else:
-            type_hint = f"Optional[{type_hint}]"
+            property_type_hint.type_hint = f"Optional[{property_type_hint.type_hint}]"
 
-    return type_hint, output_lines
+    return property_type_hint
 
 
 def build_class_code(class_name: str, class_data: dict) -> List[str]:
@@ -155,9 +223,6 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
 
     output_lines = [
         f"class {class_name}(BaseModel):",
-        "\tclass Config:",
-        "\t\textra = Extra.forbid",
-        "",
     ]
 
     if "properties" in class_data:
@@ -165,7 +230,7 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
             property_ = class_data["properties"][property_name]
 
             # compute the type hint
-            type_hint, extra_lines = type_hint_for_property(
+            property_type_hint = type_hint_for_property(
                 property_,
                 required=property_name in class_data["required"],
                 name=property_name,
@@ -173,14 +238,28 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
             )
 
             # add extra lines first
-            output_lines = extra_lines + output_lines
+            output_lines = property_type_hint.prepend_lines + output_lines
 
             # add the type hint
-            output_lines.append(f"\t{property_name}: {type_hint}")
+            if property_type_hint.type_checking:
+                output_lines.append("\tif TYPE_CHECKING:")
+                output_lines.append(
+                    f"\t\t{property_name}: {property_type_hint.type_checking_type_hint}"
+                )
+                output_lines.append("\telse:")
+                output_lines.append(
+                    f"\t\t{property_name}: {property_type_hint.type_hint}"
+                )
+            else:
+                output_lines.append(
+                    f"\t{property_name}: {property_type_hint.type_hint}"
+                )
 
             # add a docstring if there is one
             if "description" in property_:
                 output_lines.extend(['\t"""', "\t" + property_["description"], '\t"""'])
+    else:
+        output_lines.append("\tpass")
 
     # add a blank line at the end
     output_lines.append("")
@@ -224,7 +303,13 @@ def python_code() -> None:
         "from __future__ import annotations",
         "",
         "from typing import Any, List, Optional, Literal, TYPE_CHECKING, Tuple, Protocol",
-        "from pydantic import BaseModel, Extra, Field",
+        "from pydantic import Extra, Field, conlist",
+        "from pydantic import BaseModel as PydanticBaseModel",
+        "",
+        "",
+        "class BaseModel(PydanticBaseModel):",
+        "\tclass Config:",
+        "\t\textra = Extra.forbid",
         "",
         "",
     ]
