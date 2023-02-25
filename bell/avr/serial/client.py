@@ -1,6 +1,5 @@
-import time
-
 import serial
+from bell.avr.utils.decorators import run_forever
 
 
 class SerialLoop(serial.Serial):
@@ -8,8 +7,7 @@ class SerialLoop(serial.Serial):
     Like the normal pyserial class, but with a method to run forever.
     """
 
+    @run_forever(period=0.01)
     def run(self) -> None:
-        while True:
-            while self.in_waiting > 0:
-                self.read(1)
-            time.sleep(0.01)
+        while self.in_waiting > 0:
+            self.read(1)

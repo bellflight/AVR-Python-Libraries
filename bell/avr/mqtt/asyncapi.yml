@@ -509,10 +509,10 @@ components:
                     servo:
                         $ref: "#/components/schemas/servo"
                     position:
-                        description: "Absolute position between SERVOMIN (closed) and SERVOMAX (open)."
+                        description: "Absolute position of the servo."
                         type: integer
-                        minimum: 150
-                        maximum: 425
+                        # minimum: 700
+                        # maximum: 2200
 
         AVRFCMHILGPSStats:
             payload:

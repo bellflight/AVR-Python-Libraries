@@ -40,9 +40,18 @@ def serialize_payload(topic: str, payload: Any) -> str:
     if payload is None:
         payload = AVREmptyMessage()
 
-    # if payload is for a known topic, convert to pydantic model
-    if topic in MQTTTopicPayload and not isinstance(payload, pydantic.BaseModel):
-        payload = MQTTTopicPayload[topic](**payload)
+    # if this is a known topic
+    if topic in MQTTTopicPayload:
+        klass = MQTTTopicPayload[topic]
+
+        # if payload is already a pydantic model, check to make sure it's the right
+        # one
+        if isinstance(payload, pydantic.BaseModel) and not isinstance(payload, klass):
+            raise ValueError(f"{topic} payload must be of type {klass}")
+
+        # if not, convert to a pydantic model
+        if not isinstance(payload, pydantic.BaseModel):
+            payload = MQTTTopicPayload[topic](**payload)
 
     # convert pydantic models to json
     if isinstance(payload, pydantic.BaseModel):
