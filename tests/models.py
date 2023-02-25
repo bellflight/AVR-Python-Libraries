@@ -1,5 +1,5 @@
 from typing import Any
-from bell.avr.mqtt.client import MQTTModule, mqtt
+from bell.avr.mqtt.module import MQTTModule, paho_mqtt
 
 
 class MQTTModuleTest(MQTTModule):
@@ -10,6 +10,6 @@ class MQTTModuleTest(MQTTModule):
         pass
 
     def recieve_message(self, topic: str, payload: str) -> None:
-        msg = mqtt.MQTTMessage(topic=topic.encode())
+        msg = paho_mqtt.MQTTMessage(topic=topic.encode())
         msg.payload = payload.encode()
         self.on_message(None, None, msg)  # type: ignore

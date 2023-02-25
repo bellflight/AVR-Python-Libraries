@@ -1,10 +1,9 @@
-from bell.avr.mqtt.client import MQTTModule
 from bell.avr.mqtt.payloads import AVRPCMServo
 import json
 from tests.models import MQTTModuleTest
 
 
-def test_send_message_pydantic_class(mqtt_module: MQTTModule) -> None:
+def test_send_message_pydantic_class(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure Pydantic classes on a known topic are serialized correctly.
     """
@@ -14,7 +13,7 @@ def test_send_message_pydantic_class(mqtt_module: MQTTModule) -> None:
     )
 
 
-def test_send_message_pydantic_class_unknown_topic(mqtt_module: MQTTModule) -> None:
+def test_send_message_pydantic_class_unknown_topic(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure Pydantic classes are serialized correctly,
     even for a topic that doesn't exist.
@@ -25,7 +24,7 @@ def test_send_message_pydantic_class_unknown_topic(mqtt_module: MQTTModule) -> N
     )
 
 
-def test_send_message_dict(mqtt_module: MQTTModule) -> None:
+def test_send_message_dict(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure dicts on a kwown topic are serialized correctly.
     """
@@ -35,7 +34,7 @@ def test_send_message_dict(mqtt_module: MQTTModule) -> None:
     )
 
 
-def test_send_message_dict_unknown_topic(mqtt_module: MQTTModule) -> None:
+def test_send_message_dict_unknown_topic(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure dicts are serialized correctly,
     even for a topic that doesn't exist.
@@ -46,7 +45,7 @@ def test_send_message_dict_unknown_topic(mqtt_module: MQTTModule) -> None:
     )
 
 
-def test_send_message_none(mqtt_module: MQTTModule) -> None:
+def test_send_message_none(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure no payload is allowed
     """
@@ -56,7 +55,7 @@ def test_send_message_none(mqtt_module: MQTTModule) -> None:
     )
 
 
-def test_send_message_non_schema(mqtt_module: MQTTModule) -> None:
+def test_send_message_non_schema(mqtt_module: MQTTModuleTest) -> None:
     """
     Make sure message that is not in the schema is allowed
     """
@@ -71,7 +70,7 @@ def test_receive_message_pydantic_class(mqtt_module: MQTTModuleTest) -> None:
     Make sure Pydantic classes are deserialized correctly on a known topic.
     """
     # setup message handler
-    mqtt_module.topic_map = {"avr/pcm/servo/open": mqtt_module.test_handler}
+    mqtt_module.topic_callbacks = {"avr/pcm/servo/open": mqtt_module.test_handler}
     mqtt_module.run_non_blocking()
 
     # use test harness to send message
@@ -86,7 +85,7 @@ def test_receive_message_none(mqtt_module: MQTTModuleTest) -> None:
     Make sure topics with an empty message work.
     """
     # setup message handler
-    mqtt_module.topic_map = {"avr/pcm/laser/fire": mqtt_module.test_handler_empty}
+    mqtt_module.topic_callbacks = {"avr/pcm/laser/fire": mqtt_module.test_handler_empty}
     mqtt_module.run_non_blocking()
 
     # use test harness to send message
@@ -101,7 +100,7 @@ def test_receive_message_non_schema(mqtt_module: MQTTModuleTest) -> None:
     Make sure message that is not in the schema is allowed
     """
     # setup message handler
-    mqtt_module.topic_map = {"test/notreal": mqtt_module.test_handler}  # type: ignore
+    mqtt_module.topic_callbacks = {"test/notreal": mqtt_module.test_handler}  # type: ignore
     mqtt_module.run_non_blocking()
 
     # use test harness to send message
@@ -116,7 +115,7 @@ def test_receive_message_none_non_schema(mqtt_module: MQTTModuleTest) -> None:
     Make sure empty message that is not in the schema is allowed
     """
     # setup message handler
-    mqtt_module.topic_map = {"test/notreal": mqtt_module.test_handler_empty}  # type: ignore
+    mqtt_module.topic_callbacks = {"test/notreal": mqtt_module.test_handler_empty}  # type: ignore
     mqtt_module.run_non_blocking()
 
     # use test harness to send message

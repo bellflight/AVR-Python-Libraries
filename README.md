@@ -54,7 +54,7 @@ from bell.avr.mqtt.payloads import AVRFCMVelocity, AVRPCMServo
 class Sandbox(MQTTModule):
     def __init__(self) -> None:
         super().__init__()
-        self.topic_map = {"avr/fcm/velocity": self.show_velocity}
+        self.topic_callbacks = {"avr/fcm/velocity": self.show_velocity}
 
     def show_velocity(self, payload: AvrFcmVelocity) -> None:
         v_ms = (payload.vN, payload.vE, payload.vd)
@@ -70,9 +70,10 @@ if __name__ == "__main__":
     box.run()
 ```
 
-The `topic_map` dictionary is a class attribute that maps topics to subscribe to
-and a function that will handle an incoming payload. The `payload` argument
-should match the appropriate `Payload` class for that topic.
+The `topic_callbacks` dictionary is a class attribute that maps topics to
+subscribe to and a function that will handle an incoming payload.
+The `payload` argument should match the appropriate `Payload` class for that
+topic.
 
 Additionally, the `message_cache` attribute is a dictionary that holds
 a copy of the last payload sent by that module on a given topic. The keys are the

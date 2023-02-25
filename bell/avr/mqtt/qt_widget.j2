@@ -1,0 +1,44 @@
+# This file is automatically @generated. DO NOT EDIT!
+# fmt: off
+
+from __future__ import annotations
+
+from typing import Any, Literal, Union, overload
+
+import pydantic
+from PySide6 import QtCore, QtWidgets
+
+from bell.avr.mqtt.constants import _MQTTTopicCallableTypedDict
+from bell.avr.mqtt.dispatcher import dispatch_message
+from bell.avr.mqtt.payloads import (
+{%- for klass in topic_class.values()|unique %}
+    {{ klass }},
+{%- endfor %}
+)
+
+
+class MQTTWidget(QtWidgets.QWidget):
+    send_message_signal: QtCore.SignalInstance = QtCore.Signal(str, Any)  # type: ignore
+
+    def __init__(self, *args, **kwargs):
+        self.topic_callbacks: _MQTTTopicCallableTypedDict = {}
+
+        super().__init__(*args, **kwargs)
+
+{% for topic, klass in topic_class.items() %}
+    @overload
+    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None] = None{%- else -%}]{%- endif -%}) -> None: ...
+{%- endfor %}
+
+    def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None) -> None:
+        """
+        Emit a Qt Signal for a message to be sent to the MQTT client.
+        """
+        self.send_message_signal.emit(topic, payload)
+
+    def on_message(self, topic: str, payload: Any) -> None:
+        """
+        Process messages received from the MQTT client. At this point,
+        it's assumed the MQTT client has already deserialized the data.
+        """
+        dispatch_message(self.topic_callbacks, topic, payload)

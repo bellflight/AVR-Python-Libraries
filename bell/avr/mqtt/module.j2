@@ -1,0 +1,49 @@
+# This file is automatically @generated. DO NOT EDIT!
+# fmt: off
+
+from __future__ import annotations
+
+from typing import Any
+
+import paho.mqtt.client as paho_mqtt
+from loguru import logger
+
+from bell.avr.mqtt.client import MQTTClient
+from bell.avr.mqtt.dispatcher import dispatch_message
+
+
+class MQTTModule(MQTTClient):
+    """
+    Generic MQTT Module class that should be inherited by other modules.
+    The `topic_callbacks` attribute should be a dictionary of topics to functions
+    that will be called with a payload.
+    """
+
+    def run(self) -> None:
+        """
+        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
+        in a blocking manner.
+        """
+        # connect the MQTT client
+        self.connect_()
+        # run forever
+        self._looped_forever = True
+        self._mqtt_client.loop_forever()
+
+    def run_non_blocking(self) -> None:
+        """
+        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
+        in a non-blocking manner.
+        """
+        # connect the MQTT client
+        self.connect_()
+        # run in background
+        self._mqtt_client.loop_start()
+
+    def on_message(self, client: paho_mqtt.Client, userdata: Any, msg: paho_mqtt.MQTTMessage) -> None:
+        payload = self._deserialize_payload(msg.topic, msg.payload)
+
+        if self.enable_verbose_logging:
+            logger.debug(f"Recieved {msg.topic}: {msg.payload}")
+
+        dispatch_message(self.topic_callbacks, msg.topic, payload)
