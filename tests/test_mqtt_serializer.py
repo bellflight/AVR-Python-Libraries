@@ -59,6 +59,16 @@ from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
             "",
             "{}",
         ),
+        (  # empty json for a known topic
+            "avr/pcm/laser/fire",
+            "{}",
+            "{}",
+        ),
+        (  # empty json for an unknown topic
+            "notreal",
+            "{}",
+            "{}",
+        ),
         (  # empty payload for a known topic
             "avr/pcm/laser/fire",
             AVREmptyMessage(),
