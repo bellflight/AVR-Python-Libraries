@@ -2,14 +2,22 @@
 # fmt: off
 
 from __future__ import annotations
-
-from typing import Any
+import copy
+from typing import Any, Literal, Union, overload
 
 import paho.mqtt.client as paho_mqtt
+import pydantic
 from loguru import logger
 
 from bell.avr.mqtt.client import MQTTClient
+from bell.avr.mqtt.constants import _MQTTTopicPayloadTypedDict
 from bell.avr.mqtt.dispatcher import dispatch_message
+from bell.avr.mqtt.payloads import (
+{%- for klass in topic_class.values()|unique %}
+    {{ klass }},
+{%- endfor %}
+)
+from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
 
 
 class MQTTModule(MQTTClient):
@@ -18,32 +26,46 @@ class MQTTModule(MQTTClient):
     The `topic_callbacks` attribute should be a dictionary of topics to functions
     that will be called with a payload.
     """
+    def __init__(self):
+        super().__init__()
 
-    def run(self) -> None:
-        """
-        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
-        in a blocking manner.
-        """
-        # connect the MQTT client
-        self.connect_()
-        # run forever
-        self._looped_forever = True
-        self._mqtt_client.loop_forever()
-
-    def run_non_blocking(self) -> None:
-        """
-        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
-        in a non-blocking manner.
-        """
-        # connect the MQTT client
-        self.connect_()
-        # run in background
-        self._mqtt_client.loop_start()
+        # maintain a cache of the last message sent on a topic by this client
+        self.message_cache: _MQTTTopicPayloadTypedDict = {}
 
     def on_message(self, client: paho_mqtt.Client, userdata: Any, msg: paho_mqtt.MQTTMessage) -> None:
-        payload = self._deserialize_payload(msg.topic, msg.payload)
+        """
+        Process and dispatch an incoming message.
+        """
+        payload = deserialize_payload(msg.topic, msg.payload)
 
         if self.enable_verbose_logging:
             logger.debug(f"Recieved {msg.topic}: {msg.payload}")
 
         dispatch_message(self.topic_callbacks, msg.topic, payload)
+{% for topic, klass in topic_class.items() %}
+    @overload
+    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None] = None{%- else -%}]{%- endif -%}, force_write: bool = False) -> None: ...
+{%- endfor %}
+
+    def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
+        """
+        Sends a message to the MQTT broker. Enabling `force_write` will
+        forcefully send the message, bypassing threading mutex. Only use this
+        if you know what you're doing.
+        """
+        str_payload = serialize_payload(topic, payload)
+
+        if self.enable_verbose_logging:
+            logger.debug(f"Publishing message to {topic}: {payload}")
+
+        self._publish(topic, str_payload)
+
+        # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
+        # pre-emptively write network data while still in a callback, bypassing
+        # the thread mutex.
+        # can only be used if run with .loop_forever()
+        # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
+        if self._looped_forever or force_write:
+            self._mqtt_client.loop_write()
+
+        self.message_cache[topic] = copy.deepcopy(payload)

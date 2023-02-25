@@ -1,0 +1,52 @@
+import json
+from typing import Any
+
+import pydantic
+
+from bell.avr.mqtt.constants import MQTTTopicPayload
+from bell.avr.mqtt.payloads import AVREmptyMessage
+
+
+def deserialize_payload(topic: str, payload: bytes) -> Any:
+    """
+    Deserializes an MQTT payload into a pydantic model.
+    """
+
+    # so json.loads doesn't choke on an empty string
+    if not payload:
+        payload = b"{}"
+
+    # we talk JSON, no exceptions
+    payload = json.loads(payload)
+
+    # load the json into a pydantic model
+    if topic in MQTTTopicPayload:
+        return MQTTTopicPayload[topic](**payload)
+
+    # if we have an empty dict, manually convert it
+    elif payload == {}:
+        return AVREmptyMessage()
+
+    # whatever the user gave us
+    return payload
+
+
+def serialize_payload(topic: str, payload: Any) -> str:
+    """
+    Serializes a payload into a string we can send over MQTT.
+    """
+
+    # if no payload given, use empty message
+    if payload is None:
+        payload = AVREmptyMessage()
+
+    # if payload is for a known topic, convert to pydantic model
+    if topic in MQTTTopicPayload and not isinstance(payload, pydantic.BaseModel):
+        payload = MQTTTopicPayload[topic](**payload)
+
+    # convert pydantic models to json
+    if isinstance(payload, pydantic.BaseModel):
+        return payload.json()
+
+    # convert any other data type to json
+    return json.dumps(payload)

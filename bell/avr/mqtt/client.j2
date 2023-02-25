@@ -14,11 +14,6 @@ import pydantic
 from loguru import logger
 
 from bell.avr.mqtt.constants import _MQTTTopicCallableTypedDict, _MQTTTopicPayloadTypedDict, MQTTTopicPayload
-from bell.avr.mqtt.payloads import (
-{%- for klass in topic_class.values()|unique %}
-    {{ klass }},
-{%- endfor %}
-)
 from bell.avr.utils.env import get_env_int
 
 
@@ -45,87 +40,8 @@ class MQTTClient:
         # enable verbose logging
         self.enable_verbose_logging: bool = False
 
-        # maintain a cache of the last message sent on a topic by this client
-        self.message_cache: _MQTTTopicPayloadTypedDict = {}
-
         # record if we were started with loop forever
         self._looped_forever = False
-
-    def connect_(self, host: str = os.getenv("MQTT_HOST", "mqtt"), port: int =get_env_int("MQTT_PORT", 18830) ) -> None:
-        """
-        Connect the MQTT client to the broker. This method cannot be named "connect"
-        as this conflicts with the connect methods of Qt Signals.
-        """
-        if self.enable_verbose_logging:
-            logger.info(f"Connecting to MQTT broker at {host}:{port}")
-
-        self._mqtt_client.connect(host=host, port=port, keepalive=60)
-
-        logger.success("Connected to MQTT broker")
-
-        # if an on_message callback has been defined, connect it
-        if hasattr(self, "on_message"):
-            self._mqtt_client.on_message = self.on_message # type: ignore
-
-    def stop(self) -> None:
-        """
-        Stops the MQTT loop and disconnects from the broker.
-        """
-        if self.enable_verbose_logging:
-            logger.info("Disconnecting from MQTT server")
-
-        self._mqtt_client.disconnect()
-        self._mqtt_client.loop_stop()
-
-        if self.enable_verbose_logging:
-            logger.info("Disconnected from MQTT server")
-
-    @staticmethod
-    def _deserialize_payload(topic: str, payload: bytes) -> Any:
-        """
-        Deserializes an MQTT payload into a pydantic model.
-        """
-
-        # so json.loads doesn't choke on an empty string
-        if not payload:
-            payload = b"{}"
-
-        # we talk JSON, no exceptions
-        payload = json.loads(payload)
-
-        # load the json into a pydantic model
-        if topic in MQTTTopicPayload:
-            return MQTTTopicPayload[topic](**payload)
-
-        # if we have an empty dict, manually convert it
-        elif payload == {}:
-            return AVREmptyMessage()
-
-        # whatever the user gave us
-        return payload
-
-    @staticmethod
-    def _serialize_payload(topic: str, payload: Any) -> str:
-        """
-        Serializes a payload into a string we can send over MQTT.
-        """
-
-        # if no payload given, use empty message
-        if payload is None:
-            payload = AVREmptyMessage()
-
-        # if payload is for a known topic, convert to pydantic model
-        if topic in MQTTTopicPayload and not isinstance(
-            payload, pydantic.BaseModel
-        ):
-            payload = MQTTTopicPayload[topic](**payload)
-
-        # convert pydantic models to json
-        if isinstance(payload, pydantic.BaseModel):
-            return payload.json()
-
-        # convert any other data type to json
-        return json.dumps(payload)
 
     def on_connect(self, client: paho_mqtt.Client, userdata: Any, flags: dict, rc: int) -> None:
         """
@@ -156,30 +72,59 @@ class MQTTClient:
         Callback when the MQTT client disconnects.
         """
         logger.debug("Disconnected from MQTT server")
-{% for topic, klass in topic_class.items() %}
-    @overload
-    def send_message(self, topic: Literal["{{ topic }}"], payload: Union[{{ klass }}, dict{%- if klass == "AVREmptyMessage" -%}, None] = None{%- else -%}]{%- endif -%}, force_write: bool = False) -> None: ...
-{%- endfor %}
 
-    def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
+    def _connect(self, host: str, port: int) -> None:
         """
-        Sends a message to the MQTT broker. Enabling `force_write` will
-        forcefully send the message, bypassing threading mutex. Only use this
-        if you know what you're doing.
+        Connect the MQTT client to the broker. This method cannot be named "connect"
+        as this conflicts with the connect methods of Qt Signals.
         """
-        str_payload = self._serialize_payload(topic, payload)
+        if self.enable_verbose_logging:
+            logger.info(f"Connecting to MQTT broker at {host}:{port}")
+
+        self._mqtt_client.connect(host=host, port=port, keepalive=60)
+
+        logger.success("Connected to MQTT broker")
+
+        # if an on_message callback has been defined, connect it
+        if hasattr(self, "on_message"):
+            self._mqtt_client.on_message = self.on_message # type: ignore
+
+    def stop(self) -> None:
+        """
+        Stops the MQTT loop and disconnects from the broker.
+        """
+        if self.enable_verbose_logging:
+            logger.info("Disconnecting from MQTT server")
+
+        self._mqtt_client.disconnect()
+        self._mqtt_client.loop_stop()
 
         if self.enable_verbose_logging:
-            logger.debug(f"Publishing message to {topic}: {payload}")
+            logger.info("Disconnected from MQTT server")
 
-        self._mqtt_client.publish(topic, str_payload)
+    def run(self, host: str = os.getenv("MQTT_HOST", "mqtt"), port: int = get_env_int("MQTT_PORT", 18830) ) -> None:
+        """
+        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
+        in a blocking manner.
+        """
+        # connect the MQTT client
+        self._connect(host, port)
+        # run forever
+        self._looped_forever = True
+        self._mqtt_client.loop_forever()
 
-        # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
-        # pre-emptively write network data while still in a callback, bypassing
-        # the thread mutex.
-        # can only be used if run with .loop_forever()
-        # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
-        if self._looped_forever or force_write:
-            self._mqtt_client.loop_write()
+    def run_non_blocking(self, host: str = os.getenv("MQTT_HOST", "mqtt"), port: int = get_env_int("MQTT_PORT", 18830) ) -> None:
+        """
+        Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
+        in a non-blocking manner.
+        """
+        # connect the MQTT client
+        self._connect(host, port)
+        # run in background
+        self._mqtt_client.loop_start()
 
-        self.message_cache[topic] = copy.deepcopy(payload)
+    def _publish(self, topic: str, payload: Union[str, bytes]) -> None:
+        """
+        Raw publish function that expects a topic and a payload as a string or bytes.
+        """
+        self._mqtt_client.publish(topic, payload)

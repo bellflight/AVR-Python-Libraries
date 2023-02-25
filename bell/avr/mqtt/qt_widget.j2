@@ -3,12 +3,13 @@
 
 from __future__ import annotations
 
-from typing import Any, Literal, Union, overload
+from typing import Literal, Union, overload
 
 import pydantic
 from PySide6 import QtCore, QtWidgets
 
 from bell.avr.mqtt.constants import _MQTTTopicCallableTypedDict
+from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
 from bell.avr.mqtt.dispatcher import dispatch_message
 from bell.avr.mqtt.payloads import (
 {%- for klass in topic_class.values()|unique %}
@@ -18,7 +19,7 @@ from bell.avr.mqtt.payloads import (
 
 
 class MQTTWidget(QtWidgets.QWidget):
-    send_message_signal: QtCore.SignalInstance = QtCore.Signal(str, Any)  # type: ignore
+    send_message_signal: QtCore.SignalInstance = QtCore.Signal(str, bytes)  # type: ignore
 
     def __init__(self, *args, **kwargs):
         self.topic_callbacks: _MQTTTopicCallableTypedDict = {}
@@ -34,11 +35,13 @@ class MQTTWidget(QtWidgets.QWidget):
         """
         Emit a Qt Signal for a message to be sent to the MQTT client.
         """
-        self.send_message_signal.emit(topic, payload)
+        raw_payload = serialize_payload(topic, payload)
+        self.send_message_signal.emit(topic, raw_payload)
 
-    def on_message(self, topic: str, payload: Any) -> None:
+    def on_message(self, topic: str, payload: bytes) -> None:
         """
-        Process messages received from the MQTT client. At this point,
-        it's assumed the MQTT client has already deserialized the data.
+        Process messages received from the MQTT client. This is the *raw*
+        payload data that has not been deserialzed yet.
         """
-        dispatch_message(self.topic_callbacks, topic, payload)
+        klass_payload = deserialize_payload(topic, payload)
+        dispatch_message(self.topic_callbacks, topic, klass_payload)
