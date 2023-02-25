@@ -18,7 +18,9 @@ from bell.avr.utils.env import get_env_int
 
 
 class MQTTClient:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         # create the MQTT client
         # Currently using MQTT v3.1.1
         # No reason we can't use v5, just type hinting needs to change
