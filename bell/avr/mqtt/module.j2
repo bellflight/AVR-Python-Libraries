@@ -54,18 +54,5 @@ class MQTTModule(MQTTClient):
         if you know what you're doing.
         """
         str_payload = serialize_payload(topic, payload)
-
-        if self.enable_verbose_logging:
-            logger.debug(f"Publishing message to {topic}: {payload}")
-
-        self._publish(topic, str_payload)
-
-        # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
-        # pre-emptively write network data while still in a callback, bypassing
-        # the thread mutex.
-        # can only be used if run with .loop_forever()
-        # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
-        if self._looped_forever or force_write:
-            self._mqtt_client.loop_write()
-
+        self._publish(topic, str_payload, force_write)
         self.message_cache[topic] = copy.deepcopy(payload)

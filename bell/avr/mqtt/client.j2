@@ -125,8 +125,19 @@ class MQTTClient:
         # run in background
         self._mqtt_client.loop_start()
 
-    def _publish(self, topic: str, payload: Union[str, bytes]) -> None:
+    def _publish(self, topic: str, payload: Union[str, bytes], force_write: bool = False) -> None:
         """
         Raw publish function that expects a topic and a payload as a string or bytes.
         """
+        if self.enable_verbose_logging:
+            logger.debug(f"Publishing message to {topic}: {payload}")
+
         self._mqtt_client.publish(topic, payload)
+
+        # https://github.com/eclipse/paho.mqtt.python/blob/9782ab81fe7ee3a05e74c7f3e1d03d5611ea4be4/src/paho/mqtt/client.py#L1563
+        # pre-emptively write network data while still in a callback, bypassing
+        # the thread mutex.
+        # can only be used if run with .loop_forever()
+        # https://www.bellavrforum.org/t/sending-messages-to-pcc-from-sandbox/311/8
+        if self._looped_forever or force_write:
+            self._mqtt_client.loop_write()
