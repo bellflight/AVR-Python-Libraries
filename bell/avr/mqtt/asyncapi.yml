@@ -226,7 +226,7 @@ channels:
             message:
                 $ref: "#/components/messages/AVRVIOConfidence"
             description: "Reports the tracking camera confidence."
-    avr/apriltags/drone_position:
+    avr/apriltags/vehicle_position:
         subscribe:
             message:
                 $ref: "#/components/messages/AVRAprilTagsVehiclePosition"
@@ -420,7 +420,7 @@ components:
             maximum: 6.2831853
         tag_id:
             description: "AprilTag ID."
-            type: number
+            type: integer
             minimum: 0
         building:
             description: "Building ID. This is 0-indexed."

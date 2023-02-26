@@ -19,7 +19,7 @@ def deserialize_payload(topic: str, payload: bytes) -> Any:
     """
 
     # so json.loads doesn't choke on an empty string
-    if payload in ["", b""]:
+    if payload in {None, "", b""}:
         payload = b"{}"
 
     # we talk JSON, no exceptions

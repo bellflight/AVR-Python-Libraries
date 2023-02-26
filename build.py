@@ -6,7 +6,7 @@ import pathlib
 import shlex
 import shutil
 import subprocess
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import jinja2
 import jsonref
@@ -24,10 +24,29 @@ MQTT_DIR = THIS_DIR.joinpath("bell", "avr", "mqtt")
 @dataclasses.dataclass
 class PropertyTypeHint:
     prepend_lines: List[str]
+    """
+    Lines that should be prepended to the generated code.
+    """
     type_checking: bool
+    """
+    If there is a seperate type hint if `TYPE_CHECKING` is true.
+    """
     type_hint: str
-    type_checking_type_hint: str
-    # basic_type_hint: Optional[str] = None
+    """
+    The generated type hint.
+    """
+    type_checking_type_hint: Optional[str] = None
+    """
+    The generated type hint if `TYPE_CHECKING` is true.
+    """
+    core_type_hint: Optional[str] = None
+    """
+    The core variable type hint if in an array, such as an `int`.
+    """
+    validator: bool = False
+    """
+    If a validator is required.
+    """
 
 
 def create_name(parent: str, child: str) -> str:
@@ -54,7 +73,6 @@ def type_hint_for_number_property(
             prepend_lines=[],
             type_checking=False,
             type_hint=python_type,
-            type_checking_type_hint="",
         )
 
     # otherwise, add a Field object, with a possible default
@@ -85,10 +103,16 @@ def type_hint_for_number_property(
                 f"class {subclass_name}(BaseModel):",
                 f"\t__root__: {output}",
                 "",
+                f"\tdef __{python_type}__(self) -> {python_type}:",
+                "\t\treturn self.__root__",
+                "",
+                "",
             ],
             type_checking=True,
             type_hint=subclass_name,
             type_checking_type_hint=python_type,
+            core_type_hint=python_type,
+            validator=True,
         )
 
     # return computed type hint
@@ -96,7 +120,6 @@ def type_hint_for_number_property(
         prepend_lines=[],
         type_checking=False,
         type_hint=output,
-        type_checking_type_hint="",
     )
 
 
@@ -135,7 +158,6 @@ def type_hint_for_array_property(
             prepend_lines=sub_property_type_hint.prepend_lines,
             type_checking=False,
             type_hint=python_type,
-            type_checking_type_hint="",
         )
 
     # otherwise, add a Field object
@@ -159,6 +181,8 @@ def type_hint_for_array_property(
         type_checking=sub_property_type_hint.type_checking,
         type_hint=output,
         type_checking_type_hint=python_type_checking_type,
+        core_type_hint=sub_property_type_hint.core_type_hint,
+        validator=True,
     )
 
 
@@ -258,6 +282,16 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
             # add a docstring if there is one
             if "description" in property_:
                 output_lines.extend(['\t"""', "\t" + property_["description"], '\t"""'])
+
+            if property_type_hint.validator:
+                output_lines.extend(
+                    [
+                        f"\t@validator('{property_name}')",
+                        f"\tdef validate_{property_name}(cls, v):",
+                        f"\t\treturn _convert_type(v, {property_type_hint.core_type_hint})",
+                        "",
+                    ]
+                )
     else:
         output_lines.append("\tpass")
 
@@ -302,10 +336,17 @@ def python_code() -> None:
         "",
         "from __future__ import annotations",
         "",
-        "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple",
+        "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union",
         "",
         "from pydantic import BaseModel as PydanticBaseModel",
-        "from pydantic import Extra, Field, conlist",
+        "from pydantic import Extra, Field, conlist, validator",
+        "",
+        "",
+        "def _convert_type(iter: Union[list, tuple], convert_to: Union[Type[int], Type[float]]) -> Union[tuple, int, float]:",
+        "\tif isinstance(iter, (tuple, list)):",
+        "\t\treturn tuple(_convert_type(x, convert_to) for x in iter)",
+        "\telse:",
+        "\t\treturn convert_to(iter)",
         "",
         "",
         "class BaseModel(PydanticBaseModel):",
@@ -340,6 +381,10 @@ def python_code() -> None:
             )
         )
 
+    # convert tabs to spaces
+    final_output_lines = [i.replace("\t", "    ") for i in final_output_lines]
+
+    # write out file
     with open(output_file, "w") as fp:
         fp.write("\n".join(final_output_lines))
 
