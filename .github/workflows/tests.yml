@@ -68,18 +68,22 @@ jobs:
       - name: Install Python Dependencies
         run: poetry install
 
+      - name: Install Node Dependencies
+        run: npm install
+
       - name: Build Docs
         run: poetry run python build.py --docs
 
-  validate-apispec:
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+  # does not support 2.5.0
+  # validate-apispec:
+  #   runs-on: ubuntu-latest
+  #   if: "!contains(github.event.head_commit.message, 'ci skip')"
 
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v3
 
-      - name: Validate AsyncAPI Spec
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
-        with:
-          filepath: bell/avr/mqtt/asyncapi.yml
+  #     - name: Validate AsyncAPI Spec
+  #       uses: WaleedAshraf/asyncapi-github-action@v0.0.9
+  #       with:
+  #         filepath: bell/avr/mqtt/asyncapi.yml
