@@ -10,11 +10,11 @@ To install the base package, run:
 pip install bell-avr-libraries
 ```
 
-Additionally, the `mqtt` and `serial` extras are available if you want to use
-the MQTT or PCC functionality.
+Additionally, the `serial` and `qt` extras are available if you want to use
+the PCC or PySide functionality.
 
 ```bash
-pip install bell-avr-libraries[mqtt,serial]
+pip install bell-avr-libraries[serial,qt]
 ```
 
 ## Usage
@@ -37,7 +37,7 @@ Example:
 ```python
 from bell.avr.mqtt.payloads import AVRPCMColorSet
 
-payload = AVRPCMColorSet((128, 232, 142, 0))
+payload = AVRPCMColorSet(wrgb=(128, 232, 142, 0))
 ```
 
 The second part of the MQTT libraries is the `MQTTModule` class.
@@ -47,7 +47,7 @@ and receive MQTT messages and do something with them.
 Example:
 
 ```python
-from bell.avr.mqtt.client import MQTTModule
+from bell.avr.mqtt.module import MQTTModule
 from bell.avr.mqtt.payloads import AVRFCMVelocity, AVRPCMServo
 
 
@@ -56,7 +56,7 @@ class Sandbox(MQTTModule):
         super().__init__()
         self.topic_callbacks = {"avr/fcm/velocity": self.show_velocity}
 
-    def show_velocity(self, payload: AvrFcmVelocity) -> None:
+    def show_velocity(self, payload: AVRFCMVelocity) -> None:
         v_ms = (payload.vN, payload.vE, payload.vd)
         print(f"Velocity information: {v_ms} m/s")
 
@@ -72,8 +72,9 @@ if __name__ == "__main__":
 
 The `topic_callbacks` dictionary is a class attribute that maps topics to
 subscribe to and a function that will handle an incoming payload.
-The `payload` argument should match the appropriate `Payload` class for that
-topic.
+The `payload` argument should match the appropriate class for that
+topic. This can be determined from the documentation at
+[https://bellflight.github.io/AVR-Python-Libraries](https://bellflight.github.io/AVR-Python-Libraries)
 
 Additionally, the `message_cache` attribute is a dictionary that holds
 a copy of the last payload sent by that module on a given topic. The keys are the
@@ -187,7 +188,7 @@ ser = client.SerialLoop()
 #### PCC
 
 ```python
-from bell.avr.serial import client
+from bell.avr.serial import pcc
 ```
 
 The `PeripheralControlComputer` class sends serial messages
@@ -268,3 +269,6 @@ of classes and topics.
 
 The generator that turns this definition file into Python code is the homebrew
 [build.py](build.py), so double-check that the output makes sense.
+
+To generate the documentation, run the `build.py` script with the `--docs` option.
+This requies that Node.js is installed, and `npm` install hs been run.
