@@ -57,7 +57,7 @@ class Sandbox(MQTTModule):
         self.topic_callbacks = {"avr/fcm/velocity": self.show_velocity}
 
     def show_velocity(self, payload: AVRFCMVelocity) -> None:
-        v_ms = (payload.vN, payload.vE, payload.vd)
+        v_ms = (payload.Vn, payload.Ve, payload.Vd)
         print(f"Velocity information: {v_ms} m/s")
 
     def open_servo(self) -> None:
@@ -161,6 +161,15 @@ env.get_env_int("MQTT_HOST", 1883)
 # or 1883 if the environment variable is not set
 # or not an integer.
 ```
+
+#### Images
+
+```python
+from bell.avr.utils import images
+```
+
+The functions `serialize_image` and `deserialize_image` help serialize and
+deserialize image data in the form of multidimensional Numpy arrays.
 
 ### Serial
 

@@ -428,7 +428,7 @@ def docs() -> None:
         "--param",
         f'version={pyproject["tool"]["poetry"]["version"]}',  # version
         "--param",
-        "favicon=https://raw.githubusercontent.com/bellflight/AVR-Docs/main/static/favicons/android-chrome-512x512.png",
+        "favicon=https://raw.githubusercontent.com/bellflight/AVR-Docs/main/assets/icons/logo.png",
         "--param",
         f"config={json.dumps({'expand': {'messageExamples': True}})}",
     ]

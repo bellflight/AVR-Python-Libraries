@@ -3,28 +3,68 @@ info:
     title: "Bell AVR MQTT Message Specification"
     version: "XYZ" # don't touch, this will be automatically updated based on pyproject.toml
     description: |
-        This is the complete MQTT message specification for Bell AVR.
+        This is the complete MQTT message specification for Bell AVR. A Python package
+        with pre-made classes and utilities is available:
+        [bell-avr-libraries](https://pypi.org/project/bell-avr-libraries)
 
-        While the below examples are raw JSON data, we highly recommend using the
-        `MQTTModule`'s `send_message` method, and the Python classes associated with
-        each topic. Here are two equivalent examples:
-
-        1. Preferred method using Python classes:
-        ```python
-        from bell.avr.mqtt.payloads import AVRPCMServoAbsolute
-        self.send_message("avr/pcm/servo/absolute", AVRPCMServoAbsolute(servo=2, position=100))
+        ```bash
+        pip install bell-avr-libraries
         ```
 
-        2. Alternative method using Python dicts:
+        While the below examples are raw JSON data, we highly recommend using
+        native Python dataclasses. These can be imported from `bell.avr.mqtt.payloads`.
+
         ```python
-        self.send_message("avr/pcm/servo/absolute", {"servo": 2, "position": 100})
+        from bell.avr.mqtt.payloads import AVRPCMColorSet
         ```
+
+        Additionally, we recommend using the `MQTTModule` class from
+        `bell.avr.mqtt.module`. This class has a lot boilerplate code that
+        makes interacting with MQTT easier. The `MQTTModule` class has a `send_message`
+        method that can be used with the Python dataclasses to send data to topics.
+        This automatically performs validation to make sure the data
+        provided matches the expected format.
+
+        Here is an example of a module that changes the LED color every 5 seconds.
+        ```python
+        import random
+        import time
+
+        from bell.avr.mqtt.module import MQTTModule
+        from bell.avr.mqtt.payloads import AVRPCMColorSet
+
+
+        class Sandbox(MQTTModule):
+            def update_led(self) -> None:
+                wrgb = tuple(random.randint(0, 255) for _ in range(4))
+                self.send_message("avr/pcm/color/set", AVRPCMColorSet(wrgb=wrgb))
+
+            def run(self) -> None:
+                super().run_non_blocking()
+
+                while True:
+                    time.sleep(5)
+                    self.update_led()
+
+
+        if __name__ == "__main__":
+            box = Sandbox()
+            box.run()
+        ```
+
+        Alternatively, you can use a Python dict instead of the data classes.
+        ```python
+        self.send_message("avr/pcm/color/set", {"wrgb": wrgb})
+        ```
+
+        For a full code example, see
+        [AVR-VMC-Sandbox-Module](https://github.com/bellflight/AVR-VMC-Sandbox-Module).
 
         For each of the topics and operations and below, "PUB" is meant for topics
         for you to publish to, and "SUB" is meant for topics for you to subscribe to.
         While there is nothing enforcing this, publishing data to subscribe topics
         is liable to cause your drone to crash, as the data on many of these topics
-        is used for flight controller calculations.
+        is used for flight control calculations.
 channels:
     avr/pcm/color/set:
         publish:
