@@ -1,4 +1,4 @@
-asyncapi: 2.5.0
+asyncapi: 2.6.0
 info:
     title: "Bell AVR MQTT Message Specification"
     version: "XYZ" # don't touch, this will be automatically updated based on pyproject.toml
@@ -272,17 +272,17 @@ channels:
                 $ref: "#/components/messages/AVRVIOImageCapture"
             description: "Single RGB image captured from the tracking camera."
     avr/vio/image/request:
-        subscribe:
+        publish:
             message:
                 $ref: "#/components/messages/AVRVIOImageRequest"
             description: "Request a single RGB image from the tracking camera."
     avr/vio/image/stream/enable:
-        subscribe:
+        publish:
             message:
                 $ref: "#/components/messages/AVRVIOImageStreamEnable"
             description: "Enable streaming RGB images from the tracking camera."
     avr/vio/image/stream/disable:
-        subscribe:
+        publish:
             message:
                 $ref: "#/components/messages/AVREmptyMessage"
             description: "Disable streaming RGB images from the tracking camera."
