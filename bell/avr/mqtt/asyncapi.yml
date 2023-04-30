@@ -266,6 +266,26 @@ channels:
             message:
                 $ref: "#/components/messages/AVRVIOConfidence"
             description: "Reports the tracking camera confidence."
+    avr/vio/image/capture:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOImageCapture"
+            description: "Single RGB image captured from the tracking camera."
+    avr/vio/image/request:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOImageRequest"
+            description: "Request a single RGB image from the tracking camera."
+    avr/vio/image/stream/enable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOImageStreamEnable"
+            description: "Enable streaming RGB images from the tracking camera."
+    avr/vio/image/stream/disable:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Disable streaming RGB images from the tracking camera."
     avr/apriltags/vehicle_position:
         subscribe:
             message:
@@ -467,6 +487,15 @@ components:
             type: integer
             minimum: 0
             maximum: 15
+        tracking_camera_side:
+            description: "Which side of the camera to capture an image from"
+            type: string
+            enum:
+                - left
+                - right
+        image_compression_request:
+            description: "Whether or not the image data should be zlib compressed."
+            type: boolean
 
     messages:
         AVREmptyMessage:
@@ -1065,6 +1094,60 @@ components:
                         type: number
                         minimum: 0
                         maximum: 100
+
+        AVRVIOImageCapture:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - data
+                    - size
+                    - compressed
+                properties:
+                    data:
+                        description: "Base64 encoded data of the image"
+                        type: string
+                    size:
+                        description: "The size of the image data. For example: [1270, 480, 4] would be a 1270x480 image with 4 channels per pixel."
+                        type: array
+                        items:
+                            type: integer
+                            minimum: 1
+                    compressed:
+                        description: "Whether or not the image data is zlib compressed."
+                        type: boolean
+
+        AVRVIOImageRequest:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - side
+                    - compressed
+                properties:
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
+                    compressed:
+                        $ref: "#/components/schemas/image_compression_request"
+
+        AVRVIOImageStreamEnable:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - side
+                    - compressed
+                    - frequency
+                properties:
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
+                    compressed:
+                        $ref: "#/components/schemas/image_compression_request"
+                    frequency:
+                        description: "At what rate should new images be sent (frames per second)."
+                        type: integer
+                        exclusiveMinimum: 0
+                        maximum: 30
 
         AVRAprilTagsVehiclePosition:
             payload:
