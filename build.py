@@ -231,7 +231,7 @@ def type_hint_for_property(
             property_type_hint.type_hint += f" = Field(default={property_['default']})"
 
     elif property_["type"] in ["number", "integer"]:
-        subclass_name = (parent_name + name.title()).replace("_", "")
+        subclass_name = create_name(parent_name, name)
         property_type_hint = type_hint_for_number_property(
             property_, nested=nested, name=name, parent_name=parent_name
         )
