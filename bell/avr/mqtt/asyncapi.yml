@@ -493,8 +493,39 @@ components:
             enum:
                 - left
                 - right
+        image_data:
+            description: |
+                Base64 encoded data of the image. To reconstruct this as a numpy array,
+                use `bell.avr.utils.images.deserialize_image` and an `bell.avr.utils.images.ImageData` class.
+                Alternatively, manually reconstructing the image is as follows:
+
+                ```python
+                import base64
+                import zlib
+                import numpy as np
+
+                image_bytes = base64.b64decode(image_data.encode("utf-8"))
+
+                if compressed:
+                    image_bytes = zlib.decompress(image_bytes)
+
+                image_byte_array = bytearray(image_bytes)
+                image_array = np.array(image_byte_array)
+
+                original_array = np.reshape(image_array, shape)
+                ```
+            type: string
+        image_shape:
+            description: "The shape of the image data. For example: [1270, 480, 4] would be a 1270x480 image with 4 channels per pixel."
+            type: array
+            items:
+                type: integer
+                minimum: 1
         image_compression_request:
             description: "Whether or not the image data should be zlib compressed."
+            type: boolean
+        image_compressed:
+            description: "Whether or not the image data is zlib compressed."
             type: boolean
 
     messages:
@@ -1101,23 +1132,18 @@ components:
                 additionalProperties: false
                 required:
                     - data
-                    - size
+                    - side
+                    - shape
                     - compressed
                 properties:
                     data:
-                        description: "Base64 encoded data of the image"
-                        type: string
+                        $ref: "#/components/schemas/image_data"
                     side:
                         $ref: "#/components/schemas/tracking_camera_side"
-                    size:
-                        description: "The size of the image data. For example: [1270, 480, 4] would be a 1270x480 image with 4 channels per pixel."
-                        type: array
-                        items:
-                            type: integer
-                            minimum: 1
+                    shape:
+                        $ref: "#/components/schemas/image_shape"
                     compressed:
-                        description: "Whether or not the image data is zlib compressed."
-                        type: boolean
+                        $ref: "#/components/schemas/image_compressed"
 
         AVRVIOImageRequest:
             payload:
@@ -1300,21 +1326,15 @@ components:
                 additionalProperties: false
                 required:
                     - data
+                    - shape
+                    - compressed
                 properties:
                     data:
-                        description: |
-                            The raw data from the thermal camera are integer values from an 8x8 grid of pixels. This data is then converted into a `bytearray` and base64 encoded. Any example of how to unpack this data:
-
-                            ```python
-                            import base64
-                            import json
-
-                            data = json.loads(payload)["data"]
-                            base64_decoded = data.encode("utf-8")
-                            as_bytes = base64.b64decode(base64_decoded)
-                            pixel_ints = list(bytearray(as_bytes))
-                            ```
-                        type: string
+                        $ref: "#/components/schemas/image_data"
+                    shape:
+                        $ref: "#/components/schemas/image_shape"
+                    compressed:
+                        $ref: "#/components/schemas/image_compressed"
 
         AVRAutonomousBuildingEnable:
             payload:

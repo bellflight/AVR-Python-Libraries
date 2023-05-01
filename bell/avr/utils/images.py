@@ -1,19 +1,15 @@
 import base64
-import dataclasses
 import zlib
-from typing import List, Optional
+from typing import List, TypedDict
 
 import numpy as np
 
 
-@dataclasses.dataclass
-class ImageData:
+# use a TypedDict so it can easily be used with other classes with parameter expansion
+class ImageData(TypedDict):
     data: str
     shape: List[int]
     compressed: bool
-    width: int
-    height: int
-    channels: Optional[int] = None
 
 
 def serialize_image(image: np.ndarray, compress: bool = False) -> ImageData:
@@ -41,17 +37,7 @@ def serialize_image(image: np.ndarray, compress: bool = False) -> ImageData:
     base64_image_data = base64.b64encode(image_byte_array).decode("utf-8")
 
     # build class
-    image_data = ImageData(
-        data=base64_image_data,
-        shape=shape,
-        compressed=compress,
-        width=shape[0],
-        height=shape[1],
-    )
-
-    # if the array has at least 2 dimensions
-    if len(shape) > 2:
-        image_data.channels = shape[2]
+    image_data = ImageData(data=base64_image_data, shape=shape, compressed=compress)
 
     return image_data
 
@@ -61,10 +47,10 @@ def deserialize_image(image_data: ImageData) -> np.ndarray:
     Given an `ImageData` object, will reconstruct the original numpy array.
     """
     # convert the string to bytes, and then undo the base64
-    image_bytes = base64.b64decode(image_data.data.encode("utf-8"))
+    image_bytes = base64.b64decode(image_data["data"].encode("utf-8"))
 
     # decompress with zlib
-    if image_data.compressed:
+    if image_data["compressed"]:
         image_bytes = zlib.decompress(image_bytes)
 
     # convert bytes to a byte array
@@ -72,4 +58,4 @@ def deserialize_image(image_data: ImageData) -> np.ndarray:
     # convert the byte array back into a numpy array
     image_array = np.array(image_byte_array)
 
-    return np.reshape(image_array, image_data.shape)
+    return np.reshape(image_array, image_data["shape"])
