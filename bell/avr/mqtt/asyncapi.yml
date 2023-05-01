@@ -1107,6 +1107,8 @@ components:
                     data:
                         description: "Base64 encoded data of the image"
                         type: string
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
                     size:
                         description: "The size of the image data. For example: [1270, 480, 4] would be a 1270x480 image with 4 channels per pixel."
                         type: array
