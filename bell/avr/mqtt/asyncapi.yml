@@ -524,6 +524,7 @@ components:
         image_compression_request:
             description: "Whether or not the image data should be zlib compressed."
             type: boolean
+            default: false
         image_compressed:
             description: "Whether or not the image data is zlib compressed."
             type: boolean

@@ -227,6 +227,9 @@ def type_hint_for_property(
         else:
             property_type_hint.type_hint = "str"
 
+        if "default" in property_:
+            property_type_hint.type_hint += f" = Field(default={property_['default']})"
+
     elif property_["type"] in ["number", "integer"]:
         subclass_name = (parent_name + name.title()).replace("_", "")
         property_type_hint = type_hint_for_number_property(
@@ -235,6 +238,9 @@ def type_hint_for_property(
 
     elif property_["type"] == "boolean":
         property_type_hint.type_hint = "bool"
+
+        if "default" in property_:
+            property_type_hint.type_hint += f" = Field(default={property_['default']})"
 
     elif property_["type"] == "object":
         subclass_name = create_name(parent_name, name)
