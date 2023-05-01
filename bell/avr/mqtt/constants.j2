@@ -10,8 +10,6 @@ from .payloads import (
 {%- endfor %}
 )
 
-
-
 MQTTTopics = [
 {%- for topic in topic_class.keys() %}
     "{{ topic }}",

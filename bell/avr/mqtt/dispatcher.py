@@ -3,9 +3,10 @@ from typing import Any
 from bell.avr.mqtt.constants import _MQTTTopicCallableTypedDict
 from bell.avr.mqtt.payloads import AVREmptyMessage
 
+
 def dispatch_message(
     topic_callbacks: _MQTTTopicCallableTypedDict, topic: str, payload: Any
-):
+) -> None:
     """
     Dispatch a message to the appropriate callback with the correct arguments.
     """

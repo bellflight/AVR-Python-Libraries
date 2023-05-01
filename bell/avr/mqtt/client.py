@@ -19,7 +19,10 @@ class MQTTClient:
         # Currently using MQTT v3.1.1
         # No reason we can't use v5, just type hinting needs to change
         # for some `on_` functions.
-        self._mqtt_client = paho_mqtt.Client(client_id=f"{self.__class__.__name__}_{uuid.uuid4()}", protocol=paho_mqtt.MQTTv311)
+        self._mqtt_client = paho_mqtt.Client(
+            client_id=f"{self.__class__.__name__}_{uuid.uuid4()}",
+            protocol=paho_mqtt.MQTTv311,
+        )
 
         # set up the on connect and on message handlers
         self._mqtt_client.on_connect = self.on_connect
@@ -39,7 +42,9 @@ class MQTTClient:
         # record if we were started with loop forever
         self._looped_forever = False
 
-    def on_connect(self, client: paho_mqtt.Client, userdata: Any, flags: dict, rc: int) -> None:
+    def on_connect(
+        self, client: paho_mqtt.Client, userdata: Any, flags: dict, rc: int
+    ) -> None:
         """
         On connection callback. Subscribes to MQTT topics in the topic map,
         plus any additional `self.subscribe_to` flags.
@@ -83,7 +88,7 @@ class MQTTClient:
 
         # if an on_message callback has been defined, connect it
         if hasattr(self, "on_message"):
-            self._mqtt_client.on_message = self.on_message # type: ignore
+            self._mqtt_client.on_message = self.on_message  # type: ignore
 
     def stop(self) -> None:
         """
@@ -98,7 +103,11 @@ class MQTTClient:
         if self.enable_verbose_logging:
             logger.info("Disconnected from MQTT server")
 
-    def run(self, host: str = os.getenv("MQTT_HOST", "mqtt"), port: int = get_env_int("MQTT_PORT", 18830) ) -> None:
+    def run(
+        self,
+        host: str = os.getenv("MQTT_HOST", "mqtt"),
+        port: int = get_env_int("MQTT_PORT", 18830),
+    ) -> None:
         """
         Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
         in a blocking manner.
@@ -109,7 +118,11 @@ class MQTTClient:
         self._looped_forever = True
         self._mqtt_client.loop_forever()
 
-    def run_non_blocking(self, host: str = os.getenv("MQTT_HOST", "mqtt"), port: int = get_env_int("MQTT_PORT", 18830) ) -> None:
+    def run_non_blocking(
+        self,
+        host: str = os.getenv("MQTT_HOST", "mqtt"),
+        port: int = get_env_int("MQTT_PORT", 18830),
+    ) -> None:
         """
         Class entrypoint. Connects to the MQTT broker and starts the MQTT loop
         in a non-blocking manner.
@@ -119,7 +132,9 @@ class MQTTClient:
         # run in background
         self._mqtt_client.loop_start()
 
-    def _publish(self, topic: str, payload: Union[str, bytes], force_write: bool = False) -> None:
+    def _publish(
+        self, topic: str, payload: Union[str, bytes], force_write: bool = False
+    ) -> None:
         """
         Raw publish function that expects a topic and a payload as a string or bytes.
         """
