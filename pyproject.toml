@@ -21,7 +21,7 @@
 
 [tool.poetry.dependencies]
     python             = ">=3.8,<3.12"
-    loguru             = "^0.6.0"
+    loguru             = ">=0.6,<0.8"
     pydantic           = "^1.10.2"
     paho-mqtt          = "^1.6.1"
     pyserial           = { version = "^3.5", optional = true }
