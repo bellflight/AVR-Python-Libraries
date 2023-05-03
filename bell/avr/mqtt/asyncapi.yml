@@ -1174,9 +1174,9 @@ components:
                         $ref: "#/components/schemas/image_compression_request"
                     frequency:
                         description: "At what rate should new images be sent (frames per second)."
-                        type: integer
+                        type: number
                         exclusiveMinimum: 0
-                        maximum: 30
+                        maximum: 5
 
         AVRAprilTagsVehiclePosition:
             payload:
