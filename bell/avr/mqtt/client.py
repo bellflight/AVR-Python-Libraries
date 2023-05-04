@@ -74,7 +74,7 @@ class MQTTClient:
         """
         logger.debug("Disconnected from MQTT server")
 
-    def _connect(self, host: str, port: int) -> None:
+    def connect_(self, host: str, port: int) -> None:
         """
         Connect the MQTT client to the broker. This method cannot be named "connect"
         as this conflicts with the connect methods of Qt Signals.
@@ -113,7 +113,7 @@ class MQTTClient:
         in a blocking manner.
         """
         # connect the MQTT client
-        self._connect(host, port)
+        self.connect_(host, port)
         # run forever
         self._looped_forever = True
         self._mqtt_client.loop_forever()
@@ -128,7 +128,7 @@ class MQTTClient:
         in a non-blocking manner.
         """
         # connect the MQTT client
-        self._connect(host, port)
+        self.connect_(host, port)
         # run in background
         self._mqtt_client.loop_start()
 
