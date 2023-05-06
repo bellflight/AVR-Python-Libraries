@@ -4,7 +4,9 @@
     description = "Common Python libraries used by parts of Bell AVR"
     license = "MIT"
     readme = "README.md"
-    homepage = "https://github.com/bellflight/AVR-Python-Libraries"
+    homepage = "https://roboticseducation.org/bell-advanced-vertical-robotics/"
+    repository = "https://github.com/bellflight/AVR-Python-Libraries"
+    documentation = "https://bellflight.github.io/AVR-Python-Libraries"
     authors = [
         "Chris Padilla <cpadilla@bellflight.com>",
         "Nathan Vaughn <nvaughn51@gmail.com>",
