@@ -484,9 +484,11 @@ def docs() -> None:
     if not DOCS_FAVICON.exists():
         urllib.request.urlretrieve(ICON_URL, DOCS_FAVICON)
 
+    # build Python docs
     python_docs()
 
-    # this must come second
+    # build asyncapi docs
+    # This must come second.
     mqtt_docs()
 
 

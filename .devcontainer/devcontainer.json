@@ -1,6 +1,9 @@
 {
-    "image": "docker.io/nikolaik/python-nodejs:python3.11-nodejs19-bullseye",
-    "postCreateCommand": "npm install -g npm && npm install && poetry self add poetry-pre-commit-plugin && poetry install --sync --all-extras && poetry run pre-commit install --install-hooks",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "../"
+    },
+	"postCreateCommand": "npm install && poetry install --sync --all-extras && poetry run pre-commit install --install-hooks && git config gpg.program gpg2",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -9,7 +12,9 @@
 				"charliermarsh.ruff",
 				"ms-python.black-formatter",
 				"redhat.vscode-yaml",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"github.vscode-github-actions",
+				"ms-azuretools.vscode-docker"
 			]
         }
     }
