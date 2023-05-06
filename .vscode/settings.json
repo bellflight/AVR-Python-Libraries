@@ -1,0 +1,7 @@
+{
+    "yaml.schemas": {
+        "http://asyncapi.com/definitions/2.6.0/asyncapi.json": [
+            "asyncapi.yml"
+        ]
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "image": "docker.io/nikolaik/python-nodejs:python3.11-nodejs19-bullseye",
+    "postCreateCommand": "npm install -g npm && npm install && poetry self add poetry-pre-commit-plugin && poetry install --all-extras && poetry run pre-commit install --install-hooks",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+				"asyncapi.asyncapi-preview",
+				"ms-python.python",
+				"charliermarsh.ruff",
+				"ms-python.black-formatter",
+				"redhat.vscode-yaml",
+				"tamasfe.even-better-toml"
+			]
+        }
+    }
+}

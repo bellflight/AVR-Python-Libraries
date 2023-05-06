@@ -56,6 +56,10 @@ class PropertyTypeHint:
     """
     If a validator is required.
     """
+    validator_iter: Optional[str] = None
+    """
+    The iterator format to convert to for a validator. Can be a list or tuple.
+    """
 
 
 def create_name(parent: str, child: str) -> str:
@@ -77,7 +81,16 @@ def type_hint_for_number_property(
         raise ValueError(f"Not a valid number type: {property_['type']}")
 
     # if there are no extras, just return the python type
-    if all(p not in property_ for p in ["default", "minimum", "maximum"]):
+    if all(
+        p not in property_
+        for p in [
+            "default",
+            "minimum",
+            "maximum",
+            "exclusiveMinimum",
+            "exclusiveMaximum",
+        ]
+    ):
         return PropertyTypeHint(
             prepend_lines=[],
             type_checking=False,
@@ -87,7 +100,7 @@ def type_hint_for_number_property(
     # otherwise, add a Field object, with a possible default
     # https://docs.pydantic.dev/visual_studio_code/#adding-a-default-with-field
     field_value = "..."
-    default = property_.get("default", None)
+    default = property_.get("default")
     if default is not None:
         field_value = f"default={default}"
 
@@ -96,10 +109,14 @@ def type_hint_for_number_property(
     # possible min value
     if "minimum" in property_:
         output += f", ge={property_['minimum']}"
+    elif "exclusiveMinimum" in property_:
+        output += f", gt={property_['exclusiveMinimum']}"
 
     # possible max value
     if "maximum" in property_:
         output += f", le={property_['maximum']}"
+    elif "exclusiveMaximum" in property_:
+        output += f", lt={property_['exclusiveMaximum']}"
 
     # round it out and return
     output += ")"
@@ -165,8 +182,12 @@ def type_hint_for_array_property(
         # if just a basic list and nothing else, return
         return PropertyTypeHint(
             prepend_lines=sub_property_type_hint.prepend_lines,
-            type_checking=False,
+            type_checking=sub_property_type_hint.type_checking,
             type_hint=python_type,
+            type_checking_type_hint=python_type_checking_type,
+            core_type_hint=sub_property_type_hint.core_type_hint,
+            validator=sub_property_type_hint.validator,
+            validator_iter="list",
         )
 
     # otherwise, add a Field object
@@ -192,6 +213,7 @@ def type_hint_for_array_property(
         type_checking_type_hint=python_type_checking_type,
         core_type_hint=sub_property_type_hint.core_type_hint,
         validator=True,
+        validator_iter="tuple",
     )
 
 
@@ -214,14 +236,20 @@ def type_hint_for_property(
         else:
             property_type_hint.type_hint = "str"
 
+        if "default" in property_:
+            property_type_hint.type_hint += f" = Field(default={property_['default']})"
+
     elif property_["type"] in ["number", "integer"]:
-        subclass_name = (parent_name + name.title()).replace("_", "")
+        subclass_name = create_name(parent_name, name)
         property_type_hint = type_hint_for_number_property(
             property_, nested=nested, name=name, parent_name=parent_name
         )
 
     elif property_["type"] == "boolean":
         property_type_hint.type_hint = "bool"
+
+        if "default" in property_:
+            property_type_hint.type_hint += f" = Field(default={property_['default']})"
 
     elif property_["type"] == "object":
         subclass_name = create_name(parent_name, name)
@@ -296,8 +324,8 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
                 output_lines.extend(
                     [
                         f"\t@validator('{property_name}')",
-                        f"\tdef validate_{property_name}(cls, v):",
-                        f"\t\treturn _convert_type(v, {property_type_hint.core_type_hint})",
+                        f"\tdef _validate_{property_name}(cls, v) -> {property_type_hint.validator_iter}:",
+                        f"\t\treturn _convert_type(v, {property_type_hint.validator_iter}, {property_type_hint.core_type_hint})",
                         "",
                     ]
                 )
@@ -360,17 +388,29 @@ def python_code() -> None:
         "",
         "from __future__ import annotations",
         "",
-        "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union",
+        "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union, overload",
         "",
         "from pydantic import BaseModel as PydanticBaseModel",
         "from pydantic import Extra, Field, conlist, validator",
         "",
         "",
-        "def _convert_type(iter: Union[list, tuple], convert_to: Union[Type[int], Type[float]]) -> Union[tuple, int, float]:",
-        "\tif isinstance(iter, (tuple, list)):",
-        "\t\treturn tuple(_convert_type(x, convert_to) for x in iter)",
+        "@overload",
+        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[int]) -> List[int]: ...",
+        "",
+        "@overload",
+        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[float]) -> List[float]: ...",
+        "",
+        "@overload",
+        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[int]) -> Tuple[int, ...]: ...",
+        "",
+        "@overload",
+        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[float]) -> Tuple[float, ...]: ...",
+        "",
+        "def _convert_type(iter_in: Union[list, tuple], iter_out: Union[Type[list], Type[tuple]], items_convert_to: Union[Type[int], Type[float]]) -> Union[tuple, list, int, float]:",
+        "\tif isinstance(iter_in, (tuple, list)):",
+        "\t\treturn iter_out(_convert_type(x, iter_out, items_convert_to) for x in iter_in)",
         "\telse:",
-        "\t\treturn convert_to(iter)",
+        "\t\treturn items_convert_to(iter_in)",
         "",
         "",
         "class BaseModel(PydanticBaseModel):",

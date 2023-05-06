@@ -21,7 +21,11 @@ from bell.avr.mqtt.payloads import (
 class MQTTWidget(QtWidgets.QWidget):
     send_message_signal: QtCore.SignalInstance = QtCore.Signal(str, bytes)  # type: ignore
     """
-    This is a Qt Signal, not a function.
+    This should not be used directly, but rather through `send_message` instead.
+
+    The `send_message_signal` expects a topic, and the str/bytes of the MQTT payload.
+    This should already be serialized with `bell.avr.mqtt.serializer.serialize_payload`
+    and ready for transmission over the network.
     """
 
     def __init__(self, *args, **kwargs):

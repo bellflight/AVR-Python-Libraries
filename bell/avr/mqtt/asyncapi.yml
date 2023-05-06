@@ -1,9 +1,11 @@
-asyncapi: 2.5.0
+asyncapi: 2.6.0
 info:
     title: "Bell AVR MQTT Message Specification"
     version: "XYZ" # don't touch, this will be automatically updated based on pyproject.toml
     description: |
-        This is the complete MQTT message specification for Bell AVR.
+        This is the complete MQTT message specification for Bell AVR. A Python package
+        with pre-made classes and utilities is available:
+        [bell-avr-libraries](https://pypi.org/project/bell-avr-libraries)
 
         The below examples are raw JSON data so that multiple
         programming languages and environment can connect to AVR. For student
@@ -14,7 +16,7 @@ info:
         for you to publish to, and "SUB" is meant for topics for you to subscribe to.
         While there is nothing enforcing this, publishing data to subscribe topics
         is liable to cause your drone to crash, as the data on many of these topics
-        is used for flight controller calculations.
+        is used for flight control calculations.
 channels:
     avr/pcm/color/set:
         publish:
@@ -216,6 +218,26 @@ channels:
             message:
                 $ref: "#/components/messages/AVRVIOConfidence"
             description: "Reports the tracking camera confidence."
+    avr/vio/image/capture:
+        subscribe:
+            message:
+                $ref: "#/components/messages/AVRVIOImageCapture"
+            description: "Single RGB image captured from the tracking camera."
+    avr/vio/image/request:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRVIOImageRequest"
+            description: "Request a single RGB image from the tracking camera."
+    avr/vio/image/stream/enable:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRVIOImageStreamEnable"
+            description: "Enable streaming RGB images from the tracking camera."
+    avr/vio/image/stream/disable:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Disable streaming RGB images from the tracking camera."
     avr/apriltags/vehicle_position:
         subscribe:
             message:
@@ -417,6 +439,47 @@ components:
             type: integer
             minimum: 0
             maximum: 15
+        tracking_camera_side:
+            description: "Which side of the camera to capture an image from"
+            type: string
+            enum:
+                - left
+                - right
+        image_data:
+            description: |
+                Base64 encoded data of the image. To reconstruct this as a numpy array,
+                use `bell.avr.utils.images.deserialize_image` and an `bell.avr.utils.images.ImageData` class.
+                Alternatively, manually reconstructing the image is as follows:
+
+                ```python
+                import base64
+                import zlib
+                import numpy as np
+
+                image_bytes = base64.b64decode(image_data.encode("utf-8"))
+
+                if compressed:
+                    image_bytes = zlib.decompress(image_bytes)
+
+                image_byte_array = bytearray(image_bytes)
+                image_array = np.array(image_byte_array)
+
+                original_array = np.reshape(image_array, shape)
+                ```
+            type: string
+        image_shape:
+            description: "The shape of the image data. For example: [1270, 480, 4] would be a 1270x480 image with 4 channels per pixel."
+            type: array
+            items:
+                type: integer
+                minimum: 1
+        image_compression_request:
+            description: "Whether or not the image data should be zlib compressed."
+            type: boolean
+            default: false
+        image_compressed:
+            description: "Whether or not the image data is zlib compressed."
+            type: boolean
 
     messages:
         AVREmptyMessage:
@@ -1016,6 +1079,57 @@ components:
                         minimum: 0
                         maximum: 100
 
+        AVRVIOImageCapture:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - data
+                    - side
+                    - shape
+                    - compressed
+                properties:
+                    data:
+                        $ref: "#/components/schemas/image_data"
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
+                    shape:
+                        $ref: "#/components/schemas/image_shape"
+                    compressed:
+                        $ref: "#/components/schemas/image_compressed"
+
+        AVRVIOImageRequest:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - side
+                    - compressed
+                properties:
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
+                    compressed:
+                        $ref: "#/components/schemas/image_compression_request"
+
+        AVRVIOImageStreamEnable:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - side
+                    - compressed
+                    - frequency
+                properties:
+                    side:
+                        $ref: "#/components/schemas/tracking_camera_side"
+                    compressed:
+                        $ref: "#/components/schemas/image_compression_request"
+                    frequency:
+                        description: "At what rate should new images be sent (frames per second)."
+                        type: number
+                        exclusiveMinimum: 0
+                        maximum: 5
+
         AVRAprilTagsVehiclePosition:
             payload:
                 type: object
@@ -1165,21 +1279,15 @@ components:
                 additionalProperties: false
                 required:
                     - data
+                    - shape
+                    - compressed
                 properties:
                     data:
-                        description: |
-                            The raw data from the thermal camera are integer values from an 8x8 grid of pixels. This data is then converted into a `bytearray` and base64 encoded. Any example of how to unpack this data:
-
-                            ```python
-                            import base64
-                            import json
-
-                            data = json.loads(payload)["data"]
-                            base64_decoded = data.encode("utf-8")
-                            as_bytes = base64.b64decode(base64_decoded)
-                            pixel_ints = list(bytearray(as_bytes))
-                            ```
-                        type: string
+                        $ref: "#/components/schemas/image_data"
+                    shape:
+                        $ref: "#/components/schemas/image_shape"
+                    compressed:
+                        $ref: "#/components/schemas/image_compressed"
 
         AVRAutonomousBuildingEnable:
             payload:
