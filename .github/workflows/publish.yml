@@ -9,7 +9,7 @@ on:
 jobs:
   pypi-publish:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: "${{!contains(github.event.head_commit.message, 'ci skip')}}"
 
     steps:
       - name: Checkout Code
@@ -27,7 +27,7 @@ jobs:
           cache: poetry
 
       - name: Install Python Dependencies
-        run: poetry install
+        run: poetry install --sync
 
       - name: Generate Code
         run: poetry run python build.py
@@ -56,7 +56,7 @@ jobs:
 
   docs-build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: "${{!contains(github.event.head_commit.message, 'ci skip')}}"
     # make sure publish worked
     needs: pypi-publish
 
@@ -82,7 +82,7 @@ jobs:
           cache: poetry
 
       - name: Install Python Dependencies
-        run: poetry install
+        run: poetry install --sync --all-extras
 
       - name: Install Node Dependencies
         run: npm install
@@ -101,7 +101,7 @@ jobs:
 
   docs-deploy:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: "${{!contains(github.event.head_commit.message, 'ci skip')}}"
     # make sure build ran first
     needs: docs-build
 

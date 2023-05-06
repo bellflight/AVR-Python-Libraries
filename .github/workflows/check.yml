@@ -10,7 +10,7 @@ on:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: "${{!contains(github.event.head_commit.message, 'ci skip')}}"
 
     steps:
       - name: Checkout Code
@@ -35,7 +35,7 @@ jobs:
           restore-keys: pre-commit
 
       - name: Install Python Dependencies
-        run: poetry install --all-extras
+        run: poetry install --sync --all-extras
 
       - name: Generate Code
         run: poetry run python build.py
