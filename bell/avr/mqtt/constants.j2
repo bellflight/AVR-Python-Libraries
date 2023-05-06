@@ -11,14 +11,13 @@ from .payloads import (
 )
 
 
-
 MQTTTopics = [
 {%- for topic in topic_class.keys() %}
     "{{ topic }}",
 {%- endfor %}
 ]
 """
-List of all MQTT topics
+List of all MQTT topics as strings. This is in no particular order.
 """
 
 MQTTPayloads = [
@@ -27,7 +26,8 @@ MQTTPayloads = [
 {%- endfor %}
 ]
 """
-List of all MQTT payload classes
+List of all MQTT payload classes. This is in no particular order.
+There are no duplicates.
 """
 
 _MQTTTopicCallableTypedDict = TypedDict(
@@ -40,7 +40,8 @@ _MQTTTopicCallableTypedDict = TypedDict(
     total=False
 )
 """
-TypedDict of topics to callback function signature
+TypedDict of topics as keys, and function signatures that accept the corresponding
+payload class as values.
 """
 
 MQTTTopicCallable: _MQTTTopicCallableTypedDict = {
@@ -49,7 +50,9 @@ MQTTTopicCallable: _MQTTTopicCallableTypedDict = {
 {%- endfor %}
 }
 """
-Complete dictionary of topics to callback function signature
+Complete dictionary of topics as keys, and function signatures that
+accept the corresponding payload class as values.
+This is used for `bell.avr.mqtt.module.MQTTModule.topic_callbacks`.
 """
 
 _MQTTTopicPayloadTypedDict = TypedDict(
@@ -62,7 +65,7 @@ _MQTTTopicPayloadTypedDict = TypedDict(
     total=False
 )
 """
-TypedDict of topics to associated payloads
+TypedDict with topics as keys, and the associated payload class as values.
 """
 
 _MQTTTopicPayloadTypeTypedDict = TypedDict(
@@ -75,7 +78,7 @@ _MQTTTopicPayloadTypeTypedDict = TypedDict(
     total=False
 )
 """
-TypedDict of topics to associated payloads types
+TypedDict with topics as keys, and the associated payload class type as values.
 """
 
 MQTTTopicPayload: _MQTTTopicPayloadTypeTypedDict = {
@@ -84,5 +87,6 @@ MQTTTopicPayload: _MQTTTopicPayloadTypeTypedDict = {
 {%- endfor %}
 }
 """
-Actual dictionary of topics to associated payload types
+Complete dictionary with topics as keys, and the associated payload class type
+as values.
 """

@@ -2,12 +2,41 @@ import ctypes
 from struct import pack
 from typing import Any, List, Literal, Optional, Tuple, Union
 
-from loguru import logger
-
 import serial
+from loguru import logger
 
 
 class PeripheralControlComputer:
+    """
+    The `PeripheralControlComputer` class sends serial messages
+    to the AVR peripheral control computer, via easy-to-use class methods.
+
+    The class must be initialized with a
+    [`pyserial`](https://pypi.org/project/pyserial/)
+    [`serial.Serial`](https://pythonhosted.org/pyserial/pyserial_api.html#serial.Serial)
+    or `bell.avr.serial.client.SerialLoop` class instance.
+
+    Example:
+
+    ```python
+    import bell.avr.serial.client
+    import bell.avr.serial.pcc
+    import threading
+
+    client = bell.avr.serial.client.SerialLoop()
+    client.port = port
+    client.baudrate = baudrate
+    client.open()
+
+    pcc = bell.avr.serial.pcc.PeripheralControlComputer(client)
+
+    client_thread = threading.Thread(target=client.run)
+    client_thread.start()
+
+    pcc.set_servo_max(0, 100)
+    ```
+    """
+
     def __init__(self, ser: serial.Serial) -> None:
         self.ser = ser
 
@@ -34,6 +63,10 @@ class PeripheralControlComputer:
         self.shutdown: bool = False
 
     def set_base_color(self, wrgb: Tuple[int, int, int, int]) -> None:
+        """
+        Set the color of the LED strip. Expects a tuple of 4 integers between
+        0 and 255, inclusive. This is in the White, Red, Green, Blue format.
+        """
         command = self.commands.index("SET_BASE_COLOR")
         wrgb_l = list(wrgb)
 
@@ -51,8 +84,16 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_temp_color(
-        self, wrgb: Tuple[int, int, int, int], time: float = 0.5
+        self, wrgb: Tuple[int, int, int, int], duration: float = 0.5
     ) -> None:
+        """
+        Set the color of the LED strip for a specific duration.
+        Expects a tuple of 4 integers between
+        0 and 255, inclusive. This is in the White, Red, Green, Blue format.
+
+        Duration defaults to 0.5 seconds if not given.
+        """
+
         command = self.commands.index("SET_TEMP_COLOR")
         wrgb_l = list(wrgb)
 
@@ -64,7 +105,7 @@ class PeripheralControlComputer:
             if not isinstance(color, int) or color > 255 or color < 0:
                 wrgb_l[i] = 0
 
-        time_bytes = self.list_pack("<f", time)
+        time_bytes = self._list_pack("<f", duration)
         data = self._construct_payload(
             command, 1 + len(wrgb) + len(wrgb_l), wrgb_l + time_bytes
         )
@@ -75,6 +116,11 @@ class PeripheralControlComputer:
     def set_servo_open_close(
         self, servo: int, action: Literal["open", "close"]
     ) -> None:
+        """
+        Opens or closes a servo. Expects the 0-indexed servo ID and the
+        action to perform.
+        """
+
         valid_command = False
 
         command = self.commands.index("SET_SERVO_OPEN_CLOSE")
@@ -100,6 +146,11 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_servo_min(self, servo: int, minimum: float) -> None:
+        """
+        Sets the minimum pulse width of a servo. Expects the 0-indexed servo ID and
+        the minimum pulse width between 0 and 1000 non-inclusive.
+        """
+
         valid_command = False
 
         command = self.commands.index("SET_SERVO_MIN")
@@ -119,6 +170,11 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_servo_max(self, servo: int, maximum: float) -> None:
+        """
+        Sets the maximum pulse width of a servo. Expects the 0-indexed servo ID and
+        the maximum pulse width between 0 and 1000 non-inclusive.
+        """
+
         valid_command = False
 
         command = self.commands.index("SET_SERVO_MAX")
@@ -138,6 +194,11 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_servo_pct(self, servo: int, pct: int) -> None:
+        """
+        Sets the percentage open of a servo. Expects the 0-indexed servo ID and
+        the percentage open between 0 and 100 inclusive.
+        """
+
         valid_command = False
 
         command = self.commands.index("SET_SERVO_PCT")
@@ -157,6 +218,11 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_servo_abs(self, servo: int, absolute: int) -> None:
+        """
+        Sets the absolute position of a servo. Expects the 0-indexed servo ID and
+        the absolute position.
+        """
+
         valid_command = False
 
         command = self.commands.index("SET_SERVO_ABS")
@@ -179,6 +245,10 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def fire_laser(self) -> None:
+        """
+        Fires the laser for a 0.25 second pulse. Has a cooldown of 0.5 seconds.
+        """
+
         command = self.commands.index("FIRE_LASER")
 
         length = 1
@@ -188,6 +258,10 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_laser_on(self) -> None:
+        """
+        Turns laser on for 0.1 second every 0.5 seconds.
+        """
+
         command = self.commands.index("SET_LASER_ON")
 
         length = 1
@@ -197,6 +271,9 @@ class PeripheralControlComputer:
         self.ser.write(data)
 
     def set_laser_off(self) -> None:
+        """
+        Turns the laser off. Does not prevent `fire_laser`.
+        """
         command = self.commands.index("SET_LASER_OFF")
 
         length = 1
@@ -219,6 +296,9 @@ class PeripheralControlComputer:
     #     self.ser.open()
 
     def check_servo_controller(self) -> None:
+        """
+        Checks the servo controller.
+        """
         command = self.commands.index("CHECK_SERVO_CONTROLLER")
 
         length = 1
@@ -246,24 +326,28 @@ class PeripheralControlComputer:
         for section in new_data:
             payload += pack(section[0], *section[1])
 
-        crc = self.calc_crc(payload, len(payload))
+        crc = self._calc_crc(payload, len(payload))
 
         payload += pack("<B", crc)
 
         return payload
 
-    def list_pack(self, bit_format: Union[str, bytes], value: Any) -> List[int]:
+    def _list_pack(self, bit_format: Union[str, bytes], value: Any) -> List[int]:
         return list(pack(bit_format, value))
 
-    def crc8_dvb_s2(self, crc: int, a: int) -> int:
+    def _crc8_dvb_s2(self, crc: int, a: int) -> int:
         # https://stackoverflow.com/a/52997726
         crc ^= a
         for _ in range(8):
             crc = ((crc << 1) ^ 0xD5) % 256 if crc & 0x80 else (crc << 1) % 256
         return crc
 
-    def calc_crc(self, string: bytes, length: int) -> int:
+    def _calc_crc(self, string: bytes, length: int) -> int:
+        """
+        Calculates the crc for an input.
+        """
+
         crc = 0
         for i in range(length):
-            crc = self.crc8_dvb_s2(crc, string[i])
+            crc = self._crc8_dvb_s2(crc, string[i])
         return crc

@@ -6,6 +6,8 @@ import pathlib
 import shlex
 import shutil
 import subprocess
+import sys
+import urllib.request
 from typing import Dict, List, Optional
 
 import jinja2
@@ -19,6 +21,13 @@ except ImportError:
 
 THIS_DIR = pathlib.Path(__file__).parent
 MQTT_DIR = THIS_DIR.joinpath("bell", "avr", "mqtt")
+DOCS_DIR = THIS_DIR.joinpath("docs")
+DOCS_FAVICON = DOCS_DIR.joinpath("favicon.png")
+
+
+ICON_URL = (
+    "https://bellflight.github.io/AVR-Docs/BELL_Logo_AVR-Competition_RGB_081822-R00.png"
+)
 
 
 @dataclasses.dataclass
@@ -334,6 +343,21 @@ def python_code() -> None:
         "# This file is automatically @generated. DO NOT EDIT!",
         "# fmt: off",
         "",
+        '"""',
+        "These are Python classes for MQTT message payloads.",
+        "As AVR exclusively uses JSON, these are all [Pydantic](https://docs.pydantic.dev/)",
+        "classes that have all of the required fields for a message.",
+        "",
+        "This is a Python implementation of the AVR [AsyncAPI definition](../mqtt/asyncapi)."
+        "",
+        "Example:",
+        "",
+        "```python",
+        "from bell.avr.mqtt.payloads import AVRPCMColorSet",
+        "",
+        "payload = AVRPCMColorSet(wrgb=(128, 232, 142, 0))" "```",
+        '"""',
+        "",
         "from __future__ import annotations",
         "",
         "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union",
@@ -351,6 +375,7 @@ def python_code() -> None:
         "",
         "class BaseModel(PydanticBaseModel):",
         "\tclass Config:",
+        "\t\t'For [Pydantic configuration](https://docs.pydantic.dev/latest/usage/model_config/), please ignore.'",
         "\t\textra = Extra.forbid",
         "",
         "",
@@ -404,10 +429,28 @@ def python_code() -> None:
 
 
 def docs() -> None:
-    # create docs dir
-    docs_dir = THIS_DIR.joinpath("docs")
-    docs_dir.mkdir(parents=True, exist_ok=True)
+    DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
+    # delete everything except the favicon
+    for item in DOCS_DIR.iterdir():
+        if item.name.startswith("favicon"):
+            continue
+        elif item.is_file():
+            item.unlink()
+        elif item.is_dir():
+            shutil.rmtree(item)
+
+    # download the favicon
+    if not DOCS_FAVICON.exists():
+        urllib.request.urlretrieve(ICON_URL, DOCS_FAVICON)
+
+    python_docs()
+
+    # this must come second
+    mqtt_docs()
+
+
+def mqtt_docs() -> None:
     apispec = MQTT_DIR.joinpath("asyncapi.yml")
 
     with open(THIS_DIR.joinpath("pyproject.toml"), "rb") as fp:
@@ -417,28 +460,49 @@ def docs() -> None:
     npx = shutil.which("npx")
     assert npx is not None
 
+    output_dir = DOCS_DIR.joinpath("bell", "avr", "mqtt", "asyncapi")
+
     cmd = [
         npx,
         "ag",  # asyncapi generator
         str(apispec.absolute()),  # asyncapi spec
         "@asyncapi/html-template",  # html template
         "--output",
-        str(docs_dir.absolute()),  # output directory
+        str(output_dir.absolute()),  # output directory
         "--force-write",  # force overwrite
+        "--param",
+        "baseHref=''",
         "--param",
         f'version={pyproject["tool"]["poetry"]["version"]}',  # version
         "--param",
-        "favicon=https://raw.githubusercontent.com/bellflight/AVR-Docs/main/static/favicons/android-chrome-512x512.png",
+        f"favicon={DOCS_FAVICON.absolute()}",
         "--param",
         f"config={json.dumps({'expand': {'messageExamples': True}})}",
     ]
 
-    print("Building docs")
+    print("Building AsyncAPI docs")
     print(shlex.join(cmd))
 
     subprocess.check_call(
         cmd,
         env={**os.environ, "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": "true"},
+    )
+
+
+def python_docs() -> None:
+    subprocess.check_call(
+        [
+            sys.executable,
+            "-m",
+            "pdoc",
+            "bell.avr",
+            "--output-directory",
+            str(DOCS_DIR.absolute()),
+            "--favicon",
+            f"/{DOCS_FAVICON.name}",
+            "--logo",
+            f"/{DOCS_FAVICON.name}",
+        ]
     )
 
 

@@ -7,7 +7,8 @@ def dispatch_message(
     topic_callbacks: _MQTTTopicCallableTypedDict, topic: str, payload: Any
 ):
     """
-    Dispatch a message to the appropriate callback with the correct arguments.
+    Given a dictionary of topics and callbacks,
+    this dispatches this executes appropriate callback with the correct arguments.
     """
     if topic not in topic_callbacks:
         return

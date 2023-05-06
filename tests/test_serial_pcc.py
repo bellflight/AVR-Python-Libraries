@@ -9,7 +9,7 @@ def test_set_base_color(pcc: PeripheralControlComputer) -> None:
 
 
 def test_set_temp_color(pcc: PeripheralControlComputer) -> None:
-    pcc.set_temp_color(wrgb=(1, 2, 3, 4), time=5)
+    pcc.set_temp_color(wrgb=(1, 2, 3, 4), duration=5)
     pcc.ser.write.assert_called_once_with(
         b"$P<\x00\t\x06\x01\x02\x03\x04\x00\x00\xa0@6"
     )

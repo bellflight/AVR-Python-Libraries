@@ -20,9 +20,44 @@ from bell.avr.mqtt.payloads import (
 
 class MQTTWidget(QtWidgets.QWidget):
     send_message_signal: QtCore.SignalInstance = QtCore.Signal(str, bytes)  # type: ignore
+    """
+    This is a Qt Signal, not a function.
+    """
 
     def __init__(self, *args, **kwargs):
+        """
+        This class is desgined for Qt applications where a widget needs to receive and
+        send MQTT messages. After the widget is initialized, the signals need to be
+        connected.
+
+        Example:
+
+        ```python
+        from bell.avr.mqtt.qt_widget import MQTTWidget
+
+
+        class ThermalViewControlWidget(MQTTWidget):
+            ...
+
+
+        thermal_view_control_widget = ThermalViewControlWidget()
+
+        # connect the `on_message` function to incoming messages
+        main_connection_widget.mqtt_connection_widget.mqtt_client.on_message_signal.connect(
+            thermal_view_control_widget.on_message
+        )
+
+        # connect the `send_message_signal` signal to the mqtt client to send messages
+        thermal_view_control_widget.send_message_signal.connect(
+            main_connection_widget.mqtt_connection_widget.mqtt_client._publish
+        )
+        ```
+        """
+
         self.topic_callbacks: _MQTTTopicCallableTypedDict = {}
+        """
+        See `bell.avr.mqtt.client.MQTTClient.topic_callbacks`.
+        """
 
         super().__init__(*args, **kwargs)
 
@@ -33,15 +68,20 @@ class MQTTWidget(QtWidgets.QWidget):
 
     def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None) -> None:
         """
-        Emit a Qt Signal for a message to be sent to the MQTT client.
+        Send a message on a topic with a given payload. The payload can be
+        a Python class or  aPython dictionary, much like
+        `bell.avr.mqtt.module.MQTTModule.send_message`.
+
+        For this application, this emits a Qt Signal for a message to be sent to the
+        MQTT client.
         """
         raw_payload = serialize_payload(topic, payload)
         self.send_message_signal.emit(topic, raw_payload)
 
     def on_message(self, topic: str, payload: bytes) -> None:
         """
-        Process messages received from the MQTT client. This is the *raw*
-        payload data that has not been deserialzed yet.
+        Process messages received from the MQTT client. The `payload` argument
+        is the *raw* payload data that has not been deserialzed yet.
         """
         klass_payload = deserialize_payload(topic, payload)
         dispatch_message(self.topic_callbacks, topic, klass_payload)

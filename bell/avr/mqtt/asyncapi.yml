@@ -5,20 +5,10 @@ info:
     description: |
         This is the complete MQTT message specification for Bell AVR.
 
-        While the below examples are raw JSON data, we highly recommend using the
-        `MQTTModule`'s `send_message` method, and the Python classes associated with
-        each topic. Here are two equivalent examples:
-
-        1. Preferred method using Python classes:
-        ```python
-        from bell.avr.mqtt.payloads import AVRPCMServoAbsolute
-        self.send_message("avr/pcm/servo/absolute", AVRPCMServoAbsolute(servo=2, position=100))
-        ```
-
-        2. Alternative method using Python dicts:
-        ```python
-        self.send_message("avr/pcm/servo/absolute", {"servo": 2, "position": 100})
-        ```
+        The below examples are raw JSON data so that multiple
+        programming languages and environment can connect to AVR. For student
+        code, we highly recommend leveraging the Python MQTT [payload classes](../payloads.html)
+        and [helpers](../module.html).
 
         For each of the topics and operations and below, "PUB" is meant for topics
         for you to publish to, and "SUB" is meant for topics for you to subscribe to.

@@ -22,19 +22,70 @@ from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
 
 class MQTTModule(MQTTClient):
     """
-    Generic MQTT Module class that should be inherited by other modules.
-    The `topic_callbacks` attribute should be a dictionary of topics to functions
-    that will be called with a payload.
+    This is a boilerplate module for AVR that makes it very easy to send
+    and receive MQTT messages and do something with them.
+
+    Here is an example of a module that changes the LED color every 5 seconds:
+    ```python
+    import random
+    import time
+
+    from bell.avr.mqtt.module import MQTTModule
+    from bell.avr.mqtt.payloads import AVRPCMColorSet
+
+
+    class Sandbox(MQTTModule):
+        def update_led(self) -> None:
+            wrgb = tuple(random.randint(0, 255) for _ in range(4))
+            self.send_message("avr/pcm/color/set", AVRPCMColorSet(wrgb=wrgb))
+
+        def run(self) -> None:
+            super().run_non_blocking()
+
+            while True:
+                time.sleep(5)
+                self.update_led()
+
+
+    if __name__ == "__main__":
+        box = Sandbox()
+        box.run()
+    ```
+
+    For a fully commented code example, see
+    [AVR-VMC-Sandbox-Module](https://github.com/bellflight/AVR-VMC-Sandbox-Module).
+
+    See `bell.avr.mqtt.client.MQTTClient.topic_callbacks` for more information on how to set up callbacks.
+
+    Additionally, the `message_cache` attribute is a dictionary that holds
+    a copy of the last payload sent by that module on a given topic. The keys are the
+    topic strings, and the values are the topic payloads.
     """
     def __init__(self):
         super().__init__()
 
-        # maintain a cache of the last message sent on a topic by this client
         self.message_cache: _MQTTTopicPayloadTypedDict = {}
+        """
+        The `message_cache` attribute is a dictionary that holds
+        a copy of the last payload sent by *that* module on a given topic.
+        The keys are the topic strings, and the values are the topic payloads.
+        This can be useful for doing operations based on the last known state
+        of a topic.
+
+        Example from the Fusion module:
+
+        ```python
+        if "avr/fusion/heading" in self.message_cache:
+            heading = int(self.message_cache["avr/fusion/heading"].hdg * 100)
+        else:
+            logger.debug("Waiting for avr/fusion/attitude/heading to be populated")
+            return
+        ```
+        """
 
     def on_message(self, client: paho_mqtt.Client, userdata: Any, msg: paho_mqtt.MQTTMessage) -> None:
         """
-        Process and dispatch an incoming message.
+        Process and dispatch an incoming message. This is called automatically.
         """
         payload = deserialize_payload(msg.topic, msg.payload)
 
@@ -49,7 +100,31 @@ class MQTTModule(MQTTClient):
 
     def send_message(self, topic: str, payload: Union[pydantic.BaseModel, dict, None] = None, force_write: bool = False) -> None:
         """
-        Sends a message to the MQTT broker. Enabling `force_write` will
+        Sends a message to the MQTT broker. This expects a topic to send the message
+        on, and the payload for the message. The payload can either be a class
+        or a dictionary.
+
+        Example:
+
+        ```python
+        from bell.avr.mqtt.payloads import AVRPCMServoAbsolute
+
+        ...
+
+        # Python class
+        self.send_message("avr/pcm/servo/absolute", AVRPCMServoAbsolute(servo=2, position=100))
+
+        # Python dicts
+        self.send_message("avr/pcm/servo/absolute", {"servo": 2, "position": 100})
+        ```
+
+        Using Python classes are highly recommended as this performs
+        extra validation checks.
+
+        For `send_message` to work, either `run` or `run_non_blocking` must have
+        already been called.
+
+        Enabling `force_write` will
         forcefully send the message, bypassing threading mutex. Only use this
         if you know what you're doing.
         """

@@ -1,3 +1,8 @@
+"""
+Using these functions ensure consistent serialization and deserialization of
+MQTT payloads.
+"""
+
 import json
 from typing import Any
 
@@ -9,12 +14,12 @@ from bell.avr.mqtt.payloads import AVREmptyMessage
 
 def deserialize_payload(topic: str, payload: bytes) -> Any:
     """
-    Deserializes an MQTT payload bytestring into a pydantic model. If the topic is
-    not know, serialized JSON will be returned.
+    Deserializes an MQTT payload bytes into a pydantic model. If the topic is
+    not known, deserialized JSON will be returned.
 
-    A ValueError will be raised if the payload is not valid JSON.
+    A `ValueError` will be raised if the payload is not valid JSON.
 
-    Additionally, a ValueError will be raised if the given topic is known
+    Additionally, a `ValueError` will be raised if the given topic is known
     and the payload does not match the required schema.
     """
 
@@ -40,12 +45,12 @@ def deserialize_payload(topic: str, payload: bytes) -> Any:
 def serialize_payload(topic: str, payload: Any) -> str:
     """
     Serializes a payload into a string we can send over MQTT. If the topic is
-    not know, serialized JSON will be returned.
+    not known, serialized JSON will be returned.
 
-    A ValueError will be raised if the payload is a string or byte string
+    A `ValueError` will be raised if the payload is a string or bytes
     and is not valid JSON.
 
-    Additionally, a ValueError will be raised if the given topic is known
+    Additionally, a `ValueError` will be raised if the given topic is known
     and the payload does not match the required schema.
     """
 
