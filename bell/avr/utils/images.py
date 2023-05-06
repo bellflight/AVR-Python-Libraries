@@ -5,11 +5,41 @@ from typing import List, TypedDict
 import numpy as np
 
 
-# use a TypedDict so it can easily be used with other classes with parameter expansion
 class ImageData(TypedDict):
+    """
+    Data structure to hold image data and metadata.
+    This is a TypedDict so it can easily be used with other classes with parameter
+    expansion.
+
+    Example:
+
+    ```python
+    from bell.avr.mqtt.payloads import AVRVIOImageCapture
+    from bell.avr.utils.images import serialize_image
+
+
+    image_data = self.camera.get_rgb_image(side)
+    serialized_image_data = serialize_image(image_data, compress=compressed)
+
+    payload = AVRVIOImageCapture(**serialized_image_data, side=side)
+    self.send_message("avr/vio/image/capture", payload)
+    ```
+    """
+
     data: str
+    """
+    The raw image data after it has been base64-encoded.
+    """
     shape: List[int]
+    """
+    The shape of the image data. This could be 2D or 3D.
+    2D is simply width and height, while 3D includes the number of
+    channels for each pixel (Red, Green, Blue for example).
+    """
     compressed: bool
+    """
+    Whether or not the image data is compressed.
+    """
 
 
 def serialize_image(image: np.ndarray, compress: bool = False) -> ImageData:
@@ -17,7 +47,8 @@ def serialize_image(image: np.ndarray, compress: bool = False) -> ImageData:
     Takes a numpy array of image data, and transforms it into format that can
     be sent over JSON. Expects a 2D or 3D numpy array. If the array does
     not contain integers, all of the values will be rounded to the nearest
-    integer. `compress` enables zlib compression.
+    integer. Setting `compress` to `True` enables
+    [zlib](https://docs.python.org/3/library/zlib.html) compression.
     """
     # record the shape before we start making changes
     shape = list(np.shape(image))
