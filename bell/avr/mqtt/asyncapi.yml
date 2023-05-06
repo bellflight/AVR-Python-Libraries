@@ -484,6 +484,7 @@ components:
     messages:
         AVREmptyMessage:
             payload:
+                description: This is an empty class to be used with topics with no payload. When data is sent on a topic that expects `AVREmptyMessage`, an empty string, or an empty dict (`{}`) are both acceptable.
                 type: object
                 additionalProperties: false
 

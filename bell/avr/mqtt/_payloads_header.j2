@@ -1,0 +1,53 @@
+# This file is automatically @generated. DO NOT EDIT!
+# fmt: off
+
+"""
+These are Python classes for MQTT message payloads.
+As AVR exclusively uses JSON, these are all [Pydantic](https://docs.pydantic.dev/)
+classes that have all of the required fields for a message.
+
+This is a Python implementation of the AVR [AsyncAPI definition](../mqtt/asyncapi).
+
+Example:
+
+```python
+from bell.avr.mqtt.payloads import AVRPCMColorSet
+
+payload = AVRPCMColorSet(wrgb=(128, 232, 142, 0))```
+Some of the Python documentation does not get generated correctly,
+please refer to the above AsyncAPI definition, or the "View Source" dropdowns
+on the right side.
+"""
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union, overload
+
+from pydantic import BaseModel as PydanticBaseModel
+from pydantic import Extra, Field, conlist, validator
+
+
+@overload
+def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[int]) -> List[int]: ...
+
+@overload
+def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[float]) -> List[float]: ...
+
+@overload
+def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[int]) -> Tuple[int, ...]: ...
+
+@overload
+def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[float]) -> Tuple[float, ...]: ...
+
+def _convert_type(iter_in: Union[list, tuple], iter_out: Union[Type[list], Type[tuple]], items_convert_to: Union[Type[int], Type[float]]) -> Union[tuple, list, int, float]:
+    if isinstance(iter_in, (tuple, list)):
+        return iter_out(_convert_type(x, iter_out, items_convert_to) for x in iter_in)
+    else:
+        return items_convert_to(iter_in)
+
+
+class BaseModel(PydanticBaseModel):
+    class Config:
+        'For [Pydantic configuration](https://docs.pydantic.dev/latest/usage/model_config/), please ignore.'
+        extra = Extra.forbid
+

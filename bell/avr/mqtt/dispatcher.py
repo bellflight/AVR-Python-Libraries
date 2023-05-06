@@ -9,7 +9,7 @@ def dispatch_message(
 ) -> None:
     """
     Given a dictionary of topics and callbacks,
-    this executes appropriate callback with the correct arguments.
+    this executes the appropriate callback with the correct arguments.
     """
     if topic not in topic_callbacks:
         return

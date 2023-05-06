@@ -64,6 +64,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v3
+
       - name: Install PySide Packages
         run: |
           sudo apt-get update -y
@@ -94,10 +98,8 @@ jobs:
 
       - name: Build Docs
         run: poetry run python build.py --docs
-
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v3
+        env:
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v1

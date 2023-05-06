@@ -24,6 +24,8 @@ MQTT_DIR = THIS_DIR.joinpath("bell", "avr", "mqtt")
 DOCS_DIR = THIS_DIR.joinpath("docs")
 DOCS_FAVICON = DOCS_DIR.joinpath("favicon.png")
 
+BASE_URL = os.getenv("BASE_URL", "/")
+
 
 ICON_URL = (
     "https://bellflight.github.io/AVR-Docs/BELL_Logo_AVR-Competition_RGB_081822-R00.png"
@@ -286,6 +288,9 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
         f"class {class_name}(BaseModel):",
     ]
 
+    if "description" in class_data:
+        output_lines.extend(['\t"""', f'\t{class_data["description"]}', '\t"""', ""])
+
     if "properties" in class_data:
         for property_name in class_data["properties"]:
             property_ = class_data["properties"][property_name]
@@ -367,59 +372,9 @@ def python_code() -> None:
         topic_class[topic] = topic_message["message"]["$ref"].split("/")[-1]
 
     # now, build the class for each topic
-    final_output_lines = [
-        "# This file is automatically @generated. DO NOT EDIT!",
-        "# fmt: off",
-        "",
-        '"""',
-        "These are Python classes for MQTT message payloads.",
-        "As AVR exclusively uses JSON, these are all [Pydantic](https://docs.pydantic.dev/)",
-        "classes that have all of the required fields for a message.",
-        "",
-        "This is a Python implementation of the AVR [AsyncAPI definition](../mqtt/asyncapi)."
-        "",
-        "Example:",
-        "",
-        "```python",
-        "from bell.avr.mqtt.payloads import AVRPCMColorSet",
-        "",
-        "payload = AVRPCMColorSet(wrgb=(128, 232, 142, 0))" "```",
-        '"""',
-        "",
-        "from __future__ import annotations",
-        "",
-        "from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union, overload",
-        "",
-        "from pydantic import BaseModel as PydanticBaseModel",
-        "from pydantic import Extra, Field, conlist, validator",
-        "",
-        "",
-        "@overload",
-        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[int]) -> List[int]: ...",
-        "",
-        "@overload",
-        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[list], items_convert_to: Type[float]) -> List[float]: ...",
-        "",
-        "@overload",
-        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[int]) -> Tuple[int, ...]: ...",
-        "",
-        "@overload",
-        "def _convert_type(iter_in: Union[list, tuple], iter_out: Type[tuple], items_convert_to: Type[float]) -> Tuple[float, ...]: ...",
-        "",
-        "def _convert_type(iter_in: Union[list, tuple], iter_out: Union[Type[list], Type[tuple]], items_convert_to: Union[Type[int], Type[float]]) -> Union[tuple, list, int, float]:",
-        "\tif isinstance(iter_in, (tuple, list)):",
-        "\t\treturn iter_out(_convert_type(x, iter_out, items_convert_to) for x in iter_in)",
-        "\telse:",
-        "\t\treturn items_convert_to(iter_in)",
-        "",
-        "",
-        "class BaseModel(PydanticBaseModel):",
-        "\tclass Config:",
-        "\t\t'For [Pydantic configuration](https://docs.pydantic.dev/latest/usage/model_config/), please ignore.'",
-        "\t\textra = Extra.forbid",
-        "",
-        "",
-    ]
+    final_output_lines = (
+        MQTT_DIR.joinpath("_payloads_header.j2").read_text().splitlines()
+    )
 
     messages = asyncapi_data["components"]["messages"]
     for message in messages:
@@ -459,6 +414,10 @@ def python_code() -> None:
 
     # for each file ending in .j2, render and write a .py file
     for template in MQTT_DIR.glob("*.j2"):
+        # skip templates that start with an underscore
+        if template.name.startswith("_"):
+            continue
+
         print("Rendering", template)
         with open(MQTT_DIR.joinpath(template.name.replace(".j2", ".py")), "w") as fp:
             fp.write(
@@ -541,9 +500,9 @@ def python_docs() -> None:
             "--output-directory",
             str(DOCS_DIR.absolute()),
             "--favicon",
-            f"/{DOCS_FAVICON.name}",
+            f"{BASE_URL}{DOCS_FAVICON.name}",
             "--logo",
-            f"/{DOCS_FAVICON.name}",
+            f"{BASE_URL}{DOCS_FAVICON.name}",
         ]
     )
 
