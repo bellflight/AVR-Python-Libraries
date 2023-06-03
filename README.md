@@ -44,7 +44,7 @@ Now, you can clone the repo and install dependencies:
 ```bash
 git clone https://github.com/bellflight/AVR-Python-Libraries
 cd AVR-Python-Libraries
-vtr install-all
+vtr install
 ```
 
 Run

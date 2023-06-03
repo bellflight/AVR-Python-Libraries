@@ -3,7 +3,7 @@
         "dockerfile": "Dockerfile",
         "context": "../"
     },
-	"postCreateCommand": "git config gpg.program gpg2",
+	"postCreateCommand": "vtr install && git config gpg.program gpg2",
     "customizations": {
         "vscode": {
             "extensions": [
