@@ -4,26 +4,29 @@
         {
             "label": "build-code",
             "type": "shell",
-            "command": "poetry run python build.py",
-            "dependsOn": ["poetry-install"]
+            "command": "poetry run python build.py"
         },
         {
             "label": "build-code-docs",
             "type": "shell",
-            "command": "poetry run python build.py --docs",
-            "dependsOn": ["install"]
+            "command": "poetry run python build.py --docs"
         },
         {
             "label": "build",
             "type": "shell",
             "command": "poetry build",
-            "dependsOn": ["build-code"]
+            "dependsOn": [
+                "build-code"
+            ]
         },
         {
             "label": "pre-commit",
             "type": "shell",
             "command": "poetry run pre-commit run --all-files",
-            "dependsOn": ["build-code", "poetry-install-all"]
+            "dependsOn": [
+                "build-code",
+                "poetry-install-all"
+            ]
         },
         {
             "label": "npm-install",
@@ -42,13 +45,18 @@
         },
         {
             "label": "install",
-            "dependsOn": ["npm-install", "poetry-install-all"]
+            "dependsOn": [
+                "npm-install",
+                "poetry-install-all"
+            ]
         },
         {
             "label": "tests",
             "command": "poetry run pytest -v --cov=bell/ --cov-report=html",
             "type": "shell",
-            "dependsOn": ["build-code"]
+            "dependsOn": [
+                "build-code"
+            ]
         }
     ]
 }
