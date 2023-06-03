@@ -70,6 +70,7 @@ jobs:
           env: |
             BASE_URL=${{ steps.pages.outputs.base_url }}
 
+
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v1
         with:
