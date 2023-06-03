@@ -9,3 +9,7 @@ RUN apt-get update -y \
 
 # update npm
 RUN npm install -g npm
+# install vscode-task-runner
+RUN pipx install vscode-task-runner
+# install everything
+RUN vtr install-all

@@ -3,7 +3,7 @@
         "dockerfile": "Dockerfile",
         "context": "../"
     },
-	"postCreateCommand": "npm install && poetry install --sync --all-extras && poetry run pre-commit install --install-hooks && git config gpg.program gpg2",
+	"postCreateCommand": "git config gpg.program gpg2",
     "customizations": {
         "vscode": {
             "extensions": [
