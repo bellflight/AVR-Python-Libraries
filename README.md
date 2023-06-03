@@ -27,12 +27,14 @@ It's assumed you have a version of Python installed from
 [python.org](https://python.org) that is the same or newer as
 defined in the [`.python-version`](.python-version) file.
 
-First, install [Poetry](https://python-poetry.org/):
+First, install [Poetry](https://python-poetry.org/) and
+[VS Code Task Runner](https://pypi.org/project/vscode-task-runner/):
 
 ```bash
 python -m pip install pipx --upgrade
 pipx ensurepath
 pipx install poetry
+pipx install vscode-task-runner
 # (Optionally) Add pre-commit plugin
 poetry self add poetry-pre-commit-plugin
 ```
@@ -42,8 +44,7 @@ Now, you can clone the repo and install dependencies:
 ```bash
 git clone https://github.com/bellflight/AVR-Python-Libraries
 cd AVR-Python-Libraries
-poetry install --sync --all-extras
-poetry run pre-commit install --install-hooks
+vtr install
 ```
 
 Run
@@ -54,8 +55,8 @@ poetry shell
 
 to activate the virtual environment.
 
-Build the auto-generated code with `poetry run python build.py`. From here,
-you can now produce a package with `poetry build`.
+You can now produce a package with `vtr build`, which will automatically
+also run `vtr build-code`.
 
 To add new message definitions, add entries to the `bell/avr/mqtt/asyncapi.yml` file.
 This is an [AsyncAPI](https://www.asyncapi.com/) definition,
@@ -65,5 +66,5 @@ of classes and topics.
 The generator that turns this definition file into Python code is the homebrew
 [build.py](build.py), so double-check that the output makes sense.
 
-To generate the documentation, run the `build.py` script with the `--docs` option.
-This requires that Node.js is installed, and `npm` install has been run.
+To generate the documentation, `vtr build-code-docs`.
+This requires that Node.js is installed.

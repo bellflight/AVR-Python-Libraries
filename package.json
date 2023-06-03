@@ -2,9 +2,5 @@
   "dependencies": {
     "@asyncapi/generator": "^1.10.4",
     "@asyncapi/html-template": "^0.28.3"
-  },
-  "scripts": {
-    "build-docs": "poetry run python build.py --docs",
-    "build-code": "poetry run python build.py"
   }
 }

@@ -7,6 +7,7 @@
     "customizations": {
         "vscode": {
             "extensions": [
+				"actboy168.tasks",
 				"asyncapi.asyncapi-preview",
 				"ms-python.python",
 				"charliermarsh.ruff",
