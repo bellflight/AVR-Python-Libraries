@@ -24,8 +24,8 @@
             "type": "shell",
             "command": "poetry run pre-commit run --all-files",
             "dependsOn": [
-                "build-code",
-                "poetry-install-all"
+                "poetry-install-all",
+                "build-code"
             ]
         },
         {
