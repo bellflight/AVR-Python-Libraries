@@ -77,7 +77,7 @@ def serialize_payload(topic: str, payload: Any) -> str:
 
     # convert pydantic models to json
     if isinstance(payload, pydantic.BaseModel):
-        return payload.json()
+        return payload.model_dump_json()
 
     # convert any other data type to json
     return json.dumps(payload)

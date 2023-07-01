@@ -12,17 +12,17 @@ from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
         (  # pydantic class for a known topic
             "avr/pcm/servo/open",
             AVRPCMServo(servo=2),
-            '{"servo": 2}',
+            '{"servo":2}',
         ),
         (  # pydantic class for an unknown topic
             "notreal",
             AVRPCMServo(servo=2),
-            '{"servo": 2}',
+            '{"servo":2}',
         ),
         (  # dict for a known topic
             "avr/pcm/servo/open",
             {"servo": 2},
-            '{"servo": 2}',
+            '{"servo":2}',
         ),
         (  # dict for an unknown topic
             "notreal",
@@ -32,7 +32,7 @@ from bell.avr.mqtt.serializer import deserialize_payload, serialize_payload
         (  # json string for a known topic
             "avr/pcm/servo/open",
             '{"servo": 2}',
-            '{"servo": 2}',
+            '{"servo":2}',
         ),
         (  # json string for an unknown topic
             "notreal",

@@ -6,7 +6,7 @@ updates:
       interval: "monthly"
     target-branch: "main"
     groups:
-      all:
+      github-actions-all:
         patterns:
           - "*"
 
@@ -16,7 +16,7 @@ updates:
       interval: "monthly"
     target-branch: "main"
     groups:
-      all:
+      npm-all:
         patterns:
           - "*"
 
@@ -26,6 +26,6 @@ updates:
       interval: "monthly"
     target-branch: "main"
     groups:
-      all:
+      pip-all:
         patterns:
           - "*"

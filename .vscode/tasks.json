@@ -53,10 +53,7 @@
         {
             "label": "tests",
             "command": "poetry run pytest -v --cov=bell/ --cov-report=html",
-            "type": "shell",
-            "dependsOn": [
-                "build-code"
-            ]
+            "type": "shell"
         }
     ]
 }

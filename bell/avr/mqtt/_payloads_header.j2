@@ -24,7 +24,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, List, Literal, Optional, Protocol, Tuple, Type, Union, overload
 
 from pydantic import BaseModel as PydanticBaseModel
-from pydantic import Extra, Field, conlist, validator
+from pydantic import RootModel as PydanticRootModel
+from pydantic import ConfigDict, Field, conlist, field_validator
 
 
 @overload
@@ -47,7 +48,6 @@ def _convert_type(iter_in: Union[list, tuple], iter_out: Union[Type[list], Type[
 
 
 class BaseModel(PydanticBaseModel):
-    class Config:
-        'For [Pydantic configuration](https://docs.pydantic.dev/latest/usage/model_config/), please ignore.'
-        extra = Extra.forbid
+    'For [Pydantic configuration](https://docs.pydantic.dev/latest/usage/model_config/), please ignore.'
+    model_config = ConfigDict(extra="forbid")
 

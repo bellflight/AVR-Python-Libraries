@@ -128,11 +128,11 @@ def type_hint_for_number_property(
         subclass_name = f"{create_name(parent_name, name)}Item"
         return PropertyTypeHint(
             prepend_lines=[
-                f"class {subclass_name}(BaseModel):",
-                f"\t__root__: {output}",
+                f"class {subclass_name}(PydanticRootModel):",
+                f"\troot: {output}",
                 "",
                 f"\tdef __{python_type}__(self) -> {python_type}:",
-                "\t\treturn self.__root__",
+                "\t\treturn self.root",
                 "",
                 "",
             ],
@@ -199,11 +199,11 @@ def type_hint_for_array_property(
 
     # possible min value
     if "minItems" in property_:
-        output += f", min_items={property_['minItems']}"
+        output += f", min_length={property_['minItems']}"
 
     # possible max value
     if "maxItems" in property_:
-        output += f", max_items={property_['maxItems']}"
+        output += f", max_length={property_['maxItems']}"
 
     # round it out and return
     output += ")"
@@ -328,7 +328,7 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
             if property_type_hint.validator:
                 output_lines.extend(
                     [
-                        f"\t@validator('{property_name}')",
+                        f"\t@field_validator('{property_name}')",
                         f"\tdef _validate_{property_name}(cls, v) -> {property_type_hint.validator_iter}: # pyright: ignore",
                         "\t\t# Function to convert list of objects into simpler types",
                         f"\t\treturn _convert_type(v, {property_type_hint.validator_iter}, {property_type_hint.core_type_hint})",
