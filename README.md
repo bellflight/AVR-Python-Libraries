@@ -1,6 +1,8 @@
 # AVR-Python-Libraries
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPi versions](https://img.shields.io/pypi/pyversions/bell-avr-libraries)](https://pypi.org/project/bell-avr-libraries)
+[![PyPi downloads](https://img.shields.io/pypi/dm/bell-avr-libraries)](https://pypi.org/project/bell-avr-libraries)
 
 ## Install
 
