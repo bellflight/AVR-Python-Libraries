@@ -329,7 +329,8 @@ def build_class_code(class_name: str, class_data: dict) -> List[str]:
                 output_lines.extend(
                     [
                         f"\t@validator('{property_name}')",
-                        f"\tdef _validate_{property_name}(cls, v) -> {property_type_hint.validator_iter}:",
+                        f"\tdef _validate_{property_name}(cls, v) -> {property_type_hint.validator_iter}: # pyright: ignore",
+                        "\t\t# Function to convert list of objects into simpler types",
                         f"\t\treturn _convert_type(v, {property_type_hint.validator_iter}, {property_type_hint.core_type_hint})",
                         "",
                     ]

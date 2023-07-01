@@ -2,7 +2,7 @@ from functools import wraps
 from typing import Any, Callable
 
 
-def dont_run_forever(*args, **kwargs) -> Callable:
+def dont_run_forever(*args: Any, **kwargs: Any) -> Callable:
     """
     Decorator to overwrite the `bell.avr.utils.decorators.run_forever` decorator when writing tests.
     Use like so:
@@ -20,7 +20,7 @@ def dont_run_forever(*args, **kwargs) -> Callable:
 
     def decorator(f: Callable) -> Callable:
         @wraps(f)
-        def wrapper(*args, **kwargs) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             return f(*args, **kwargs)
 
         return wrapper

@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Union, overload
+from typing import Literal, Optional, Union, overload
 
 import pydantic
 from PySide6 import QtCore, QtWidgets
@@ -29,7 +29,7 @@ class MQTTWidget(QtWidgets.QWidget):
     network.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, parent: Optional[QtWidgets.QWidget]) -> None:
         """
         This class is desgined for Qt applications where a widget needs to receive and
         send MQTT messages. After the widget is initialized, the signals need to be
@@ -65,7 +65,7 @@ class MQTTWidget(QtWidgets.QWidget):
         See `bell.avr.mqtt.client.MQTTClient.topic_callbacks`.
         """
 
-        super().__init__(*args, **kwargs)
+        super().__init__(parent)
 
 {% for topic, klass in topic_class.items() %}
     @overload
