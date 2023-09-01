@@ -73,6 +73,66 @@ channels:
             message:
                 $ref: "#/components/messages/AVRPCMServoAbsolute"
             description: "Set the absolute position of a specific servo."
+    avr/fcm/action/capture_home:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: Captures the "home" position that represents 0,0,0 in the NED reference frame. By default, the drone will capture this position as soon as the FCM receives data about its location. It is a *prudent* idea to manually trigger this once you have placed the drone on the starting pad.
+    avr/fcm/action/sleep:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRFCMActionSleep"
+            description: "Pauses execution of flight controller actions for a given amount of time."
+    avr/fcm/action/arm:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Arms the flight controller."
+    avr/fcm/action/disarm:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Disarms the flight controller."
+    avr/fcm/action/kill:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Completely shutoffs off the flight controller. Equivalent to flicking the kill switch on your controller."
+    avr/fcm/action/land:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Instructs the drone to land at its current position."
+    avr/fcm/action/takeoff:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRFCMActionTakeoff"
+            description: "Instructs the drone to takeoff at its current position."
+    avr/fcm/action/reboot:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Reboots the flight controller."
+    avr/fcm/action/goto/global:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRFCMGoToGlobal"
+            description: "Instructs the drone to fly to the given global coordinate system position."
+    avr/fcm/action/goto/local:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRFCMGoToLocal"
+            description: "Instructs the drone to fly to the given local coordinate system position."
+    avr/fcm/action/mission/upload:
+        publish:
+            message:
+                $ref: "#/components/messages/AVRFCMMissionUpload"
+            description: "Uploads a mission to the flight controller."
+    avr/fcm/action/mission/start:
+        publish:
+            message:
+                $ref: "#/components/messages/AVREmptyMessage"
+            description: "Starts the most recently uploaded mission."
     avr/fcm/hil_gps/stats:
         subscribe:
             message:
@@ -341,6 +401,9 @@ components:
             type: number
             minimum: -180
             maximum: 180
+        absolute_alt_meters:
+            description: "Absolute altitude in meters."
+            type: number
         takeoff_alt_meters:
             description: "Altitude relative to takeoff altitude in meters."
             type: number
@@ -568,6 +631,97 @@ components:
                         # minimum: 700
                         # maximum: 2200
 
+        AVRFCMActionSleep:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - seconds
+                properties:
+                    seconds:
+                        description: "The number of seconds to sleep for."
+                        type: integer
+
+        AVRFCMActionTakeoff:
+            payload:
+                type: object
+                description: The altitude to climb to after takeoff.
+                additionalProperties: false
+                required:
+                    - rel_alt
+                properties:
+                    rel_alt:
+                        $ref: "#/components/schemas/takeoff_alt_meters"
+
+        AVRFCMGoToGlobal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - lat
+                    - lon
+                    - abs_alt
+                properties:
+                    lat:
+                        $ref: "#/components/schemas/lat"
+                    lon:
+                        $ref: "#/components/schemas/lon"
+                    abs_alt:
+                        $ref: "#/components/schemas/absolute_alt_meters"
+
+        AVRFCMGoToLocal:
+            payload:
+                type: object
+                additionalProperties: false
+                required:
+                    - "n"
+                    - e
+                    - d
+                properties:
+                    "n":
+                        $ref: "#/components/schemas/n_meters"
+                    e:
+                        $ref: "#/components/schemas/e_meters"
+                    d:
+                        $ref: "#/components/schemas/d_meters"
+
+        AVRFCMMissionUpload:
+            payload:
+                type: object
+                description: A list of the waypoints for this mission
+                additionalProperties: false
+                required:
+                    - waypoints
+                properties:
+                    waypoints:
+                        type: array
+                        description: Either `n`, `e`, and `d` must be provided, or `lat`, `lon`, and `abs_alt` must be provided. Only the first waypoint may be a "TAKEOFF" waypoint, and that waypoint may omit an X and Y coordinate.
+                        items:
+                            type: object
+                            additionalProperties: false
+                            required:
+                                - waypoint_type
+                            properties:
+                                waypoint_type:
+                                    type: string
+                                    description: What kind of waypoint this is
+                                    enum:
+                                        - TAKEOFF
+                                        - GOTO
+                                        - LAND
+                                "n":
+                                    $ref: "#/components/schemas/n_meters"
+                                e:
+                                    $ref: "#/components/schemas/e_meters"
+                                d:
+                                    $ref: "#/components/schemas/d_meters"
+                                lat:
+                                    $ref: "#/components/schemas/lat"
+                                lon:
+                                    $ref: "#/components/schemas/lon"
+                                abs_alt:
+                                    $ref: "#/components/schemas/absolute_alt_meters"
+
         AVRFCMHILGPSStats:
             payload:
                 type: object
@@ -688,15 +842,18 @@ components:
                 required:
                     - lat
                     - lon
-                    - alt
+                    - rel_alt
+                    - abs_alt
                     - hdg
                 properties:
                     lat:
                         $ref: "#/components/schemas/lat"
                     lon:
                         $ref: "#/components/schemas/lon"
-                    alt:
+                    rel_alt:
                         $ref: "#/components/schemas/takeoff_alt_meters"
+                    abs_alt:
+                        $ref: "#/components/schemas/absolute_alt_meters"
                     hdg:
                         $ref: "#/components/schemas/hdg"
 
@@ -707,14 +864,17 @@ components:
                 required:
                     - lat
                     - lon
-                    - alt
+                    - rel_alt
+                    - abs_alt
                 properties:
                     lat:
                         $ref: "#/components/schemas/lat"
                     lon:
                         $ref: "#/components/schemas/lon"
-                    alt:
+                    rel_alt:
                         $ref: "#/components/schemas/home_alt_meters"
+                    abs_alt:
+                        $ref: "#/components/schemas/absolute_alt_meters"
 
         AVRFCMAttitudeEulerDegrees:
             payload:
