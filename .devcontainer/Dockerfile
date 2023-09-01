@@ -1,4 +1,4 @@
-FROM docker.io/nikolaik/python-nodejs:python3.11-nodejs19-bullseye
+FROM docker.io/nikolaik/python-nodejs:python3.11-nodejs20-bullseye
 
 WORKDIR /work
 ENV PRE_COMMIT_HOME .cache/pre-commit
