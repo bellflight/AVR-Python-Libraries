@@ -668,6 +668,8 @@ components:
                         $ref: "#/components/schemas/lon"
                     abs_alt:
                         $ref: "#/components/schemas/absolute_alt_meters"
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
 
         AVRFCMGoToLocal:
             payload:
@@ -684,6 +686,12 @@ components:
                         $ref: "#/components/schemas/e_meters"
                     d:
                         $ref: "#/components/schemas/d_meters"
+                    hdg:
+                        $ref: "#/components/schemas/hdg"
+                    relative:
+                        description: Whether or not the given values are relative to the drone's current position
+                        type: boolean
+                        default: false
 
         AVRFCMMissionUpload:
             payload:
