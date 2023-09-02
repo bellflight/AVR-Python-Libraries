@@ -472,8 +472,8 @@ def mqtt_docs() -> None:
         "--output",
         str(output_dir.absolute()),  # output directory
         "--force-write",  # force overwrite
-        "--param",
-        "baseHref=''",
+        # "--param", # no longer needed
+        # "baseHref=''",
         "--param",
         f'version={pyproject["tool"]["poetry"]["version"]}',  # version
         "--param",
