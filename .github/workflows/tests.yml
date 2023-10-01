@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Cache Python Packages
         uses: actions/cache@v3
@@ -55,7 +55,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Build Docs
         uses: devcontainers/ci@v0.3
@@ -69,7 +69,7 @@ jobs:
 
   #   steps:
   #     - name: Checkout Code
-  #       uses: actions/checkout@v3
+  #       uses: actions/checkout@v4
 
   #     - name: Validate AsyncAPI Spec
   #       uses: WaleedAshraf/asyncapi-github-action@v0.0.9
