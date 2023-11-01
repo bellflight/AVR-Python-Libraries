@@ -23,6 +23,7 @@
             "label": "pre-commit",
             "type": "shell",
             "command": "poetry run pre-commit run --all-files",
+            "dependsOrder": "sequence",
             "dependsOn": [
                 "poetry-install-all",
                 "build-code"
